@@ -5,7 +5,7 @@ ClipNest is a Windows desktop app for organizing reusable scripts, documents, an
 ## Features
 
 - Organize content into categories and nested categories.
-- Create bilingual scripts, single-body documents, and checklists.
+- Create bilingual scripts, single-body documents with live character counts, and checklists.
 - Search, filter by tag, and sort by order, edit time, title, or copy count.
 - Copy scripts in either language, fill in `{{name}}` placeholders, and use AI translation.
 - Browse category steps in sequence and move between them without leaving the scene.

@@ -1,6 +1,6 @@
 // Controlled editor component for individual content items
 import { $, toast, uiText, displayLanguageName } from '../utils/dom.js';
-import { esc, highlight, richTextValue } from '../utils/text.js';
+import { esc, highlight, richTextValue, countDocumentCharacters } from '../utils/text.js';
 import { state, persist, markEdited, renderAll } from '../state/store.js';
 import { storeImage, getImage } from '../services/storageService.js';
 import { openImagePreview } from './dialogsComponent.js';
@@ -57,6 +57,8 @@ function updateEditorType(type) {
   const languageField = $('#language-input-0')?.closest('.draft-language');
   if (languageField) languageField.hidden = type === 'checklist';
   $('#language-label-0').textContent = isDocument ? uiText('正文') : displayLanguageName(state.languages[0]);
+  $('#document-character-count').hidden = !isDocument;
+  if (isDocument) $('#document-character-count-value').textContent = countDocumentCharacters(richTextValue($('#language-input-0')));
   $('#language-label-1').textContent = displayLanguageName(state.languages[1]);
   $('#second-language-field').hidden = !isScript || $('#second-language-field').dataset.enabled !== 'true';
   $('#add-second-language').hidden = !isScript || $('#second-language-field').dataset.enabled === 'true';
@@ -250,6 +252,7 @@ export function syncDraft() {
   const currentTitle = richTextValue($('#title-input')).trim();
   const type = $('#item-type-input')?.value || targetItem.type || 'script';
   const currentTrans = [richTextValue($('#language-input-0')), richTextValue($('#language-input-1'))];
+  if (type === 'document') $('#document-character-count-value').textContent = countDocumentCharacters(currentTrans[0]);
   const tagList = ($('#tags-input')?.value || '').split(',').map(t => t.trim()).filter(Boolean);
   const taskLines = ($('#task-list-input')?.value || '').split(/\r?\n/).map(text => text.trim()).filter(Boolean);
 

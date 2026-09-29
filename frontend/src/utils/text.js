@@ -73,6 +73,14 @@ export function renderInlineMarkupForClipboard(text) {
   return renderInlineMarkup(text, esc);
 }
 
+// Count visible document characters, excluding whitespace and formatting markers
+export function countDocumentCharacters(text) {
+  const plain = String(text ?? '')
+    .replace(/\[\[(?:color|bg)=#[\da-f]{6}\]\]|\[\[\/(?:color|bg)\]\]/gi, '')
+    .replace(/\*\*([^*\n]+?)\*\*|\*([^*\n]+?)\*/g, '$1$2');
+  return Array.from(plain.replace(/\s/gu, '')).length;
+}
+
 // Extract distinct variable names formatted as {{varName}}
 export function extractVariables(text) {
   const pattern = /\{\{\s*([^{}]+?)\s*\}\}/g;
