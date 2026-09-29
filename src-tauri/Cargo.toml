@@ -1,6 +1,6 @@
 [package]
 name = "clipnest"
-version = "0.1.6"
+version = "0.1.7"
 description = "Offline bilingual content library"
 authors = ["ClipNest"]
 edition = "2021"

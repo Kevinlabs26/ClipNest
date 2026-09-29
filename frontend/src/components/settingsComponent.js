@@ -66,7 +66,7 @@ export function renderSettingsPage() {
   updateSidebarState();
   updateColorScheme(state.preferences.colorScheme);
 
-  $$('[data-density]').forEach(btn => {
+  $$('button[data-density]').forEach(btn => {
     btn.classList.toggle('selected', btn.dataset.density === state.preferences.density);
   });
   $$('[data-color-scheme-option]').forEach(btn => {
@@ -149,7 +149,7 @@ export function setupSettingsEventListeners() {
   $('#settings-page')?.addEventListener('click', async event => {
     const navTab = event.target.closest('[data-settings-section]');
     const backBtn = event.target.closest('#settings-back');
-    const densityBtn = event.target.closest('[data-density]');
+    const densityBtn = event.target.closest('button[data-density]');
     const colorSchemeBtn = event.target.closest('[data-color-scheme-option]');
     const themeBtn = event.target.closest('[data-theme-option]');
     const uiLangBtn = event.target.closest('[data-ui-language]');

@@ -38,7 +38,7 @@ export function updateTheme(theme = 'green') {
 // Update card layout density
 export function updateDensity(density = 'comfortable') {
   document.body.dataset.density = density;
-  document.querySelectorAll('[data-density]').forEach(button => {
+  document.querySelectorAll('button[data-density]').forEach(button => {
     const selected = button.dataset.density === density;
     button.classList.toggle('selected', selected);
     button.setAttribute('aria-pressed', String(selected));
