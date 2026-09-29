@@ -3,7 +3,7 @@ import { store, state, persist, renderAll } from '../state/store.js';
 import { updateSidebarState, updateColorScheme, updateDensity, updateTheme } from '../state/theme.js';
 import { checkAiKey, setAiKey, deleteAiKey, fetchModels } from '../services/aiService.js';
 import { AI_PROVIDERS } from '../services/storageService.js';
-import { exportBackupFile, listRestorePoints, saveRestorePoint, restoreFromPoint, importBackupFile } from '../services/backupService.js';
+import { exportBackupFile, readBackupFile, listRestorePoints, saveRestorePoint, restoreFromPoint, importBackupFile } from '../services/backupService.js';
 import { askConfirm } from './confirmComponent.js';
 
 let isSettingsVisible = false;
@@ -297,8 +297,7 @@ export function setupSettingsEventListeners() {
     const confirmed = await askConfirm(uiText('导入会替换当前素材和分类，导入前会自动创建恢复点。继续吗？'), uiText('导入备份'), uiText('继续导入'), false);
     if (!confirmed) { event.target.value = ''; return; }
     try {
-      const text = await file.text();
-      const parsed = JSON.parse(text);
+      const parsed = await readBackupFile(file);
       await importBackupFile(parsed);
       renderAll();
       renderSettingsPage();

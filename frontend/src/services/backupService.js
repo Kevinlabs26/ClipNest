@@ -13,7 +13,7 @@ export async function blobAsDataUrl(blob) {
   });
 }
 
-// Export library with embedded images into a single JSON file
+// Export library with embedded images as compressed JSON when supported
 export async function exportBackupFile() {
   const ids = [...new Set(store.state.items.flatMap(item => item.images || []))];
   const images = [];
@@ -25,13 +25,29 @@ export async function exportBackupFile() {
   }
 
   const payload = { ...store.state, images };
-  const fileBlob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const jsonBlob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+  const compressed = typeof CompressionStream === 'function';
+  const fileBlob = compressed
+    ? await new Response(jsonBlob.stream().pipeThrough(new CompressionStream('gzip'))).blob()
+    : jsonBlob;
   const downloadUrl = URL.createObjectURL(fileBlob);
   const anchor = document.createElement('a');
   anchor.href = downloadUrl;
-  anchor.download = `clipnest-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  anchor.download = `clipnest-backup-${new Date().toISOString().slice(0, 10)}.json${compressed ? '.gz' : ''}`;
   anchor.click();
   setTimeout(() => URL.revokeObjectURL(downloadUrl), 2000);
+}
+
+// Accept both new compressed backups and earlier plain JSON backups
+export async function readBackupFile(file) {
+  const header = new Uint8Array(await file.slice(0, 2).arrayBuffer());
+  if (header[0] !== 0x1f || header[1] !== 0x8b) return JSON.parse(await file.text());
+  if (typeof DecompressionStream !== 'function') throw new Error(uiText('此版本无法读取压缩备份，请更新 ClipNest'));
+  try {
+    return await new Response(file.stream().pipeThrough(new DecompressionStream('gzip'))).json();
+  } catch {
+    throw new Error(uiText('备份文件解析失败'));
+  }
 }
 
 // Save snapshot version to IndexedDB (max 10 items)

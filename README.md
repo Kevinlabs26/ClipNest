@@ -11,7 +11,7 @@ ClipNest is a Windows desktop app for organizing reusable scripts, documents, an
 - Browse category steps in sequence and move between them without leaving the scene.
 - Reorder cards by dragging them, and attach images from the clipboard or a file.
 - Edit card titles and body text inline. Changes are saved automatically.
-- Export and restore JSON backups, including images. Keep up to 10 local restore points.
+- Export losslessly compressed `.json.gz` backups when supported (otherwise `.json`), including images; import older `.json` backups too. Keep up to 10 local restore points.
 
 ## Requirements
 

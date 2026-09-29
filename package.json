@@ -1,7 +1,7 @@
 {
   "name": "clipnest",
   "private": true,
-  "version": "0.1.8",
+  "version": "0.1.9",
   "scripts": {
     "dev": "cargo tauri dev",
     "build": "cargo tauri build"
