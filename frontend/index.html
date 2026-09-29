@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f8f6">
+  <title>ClipNest</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-head"><a class="brand" href="#" aria-label="ClipNest"><span class="brand-mark">C</span><span>ClipNest<small>Content Library</small></span></a><button class="sidebar-toggle" id="sidebar-toggle" type="button" title="收起侧边栏" aria-label="收起侧边栏" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"></rect><path d="M9 4.5v15M15 9l-3 3 3 3"></path></svg></button></div>
+      <label class="search" title="搜索素材"><span>⌕</span><input id="search" type="search" placeholder="搜索素材…"><kbd>Ctrl K</kbd></label>
+      <section class="quick-access" aria-label="快捷访问">
+        <div class="side-label">快速访问</div>
+        <button class="nav-item active" data-view="all" title="全部素材" aria-label="全部素材"><span>▦</span> 全部素材 <span class="count" id="all-count"></span></button>
+        <button class="nav-item" data-view="favorites" title="常用收藏" aria-label="常用收藏"><span>☆</span> 常用收藏</button>
+        <button class="nav-item" data-view="recent" title="最近复制" aria-label="最近复制"><span>◷</span> 最近复制</button>
+      </section>
+      <div class="side-heading"><span>我的分类</span><button id="add-category" title="新建分类" aria-label="新建分类">＋</button></div>
+      <nav id="categories" class="category-list"></nav>
+      <div class="sidebar-bottom"><span class="status-dot"></span> 数据保存在此设备</div>
+    </aside>
+    <main class="main">
+      <div id="library-view">
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="page-title-row">
+            <button id="category-title-icon" class="page-category-icon" hidden title="更改分类图标" aria-label="更改分类图标" data-set-category-icon>▱</button>
+            <h1 id="page-title" class="page-title">全部素材</h1>
+            <span class="results" id="results">0 条素材</span>
+          </div>
+          <span id="current-title" hidden>全部素材</span>
+          <span id="eyebrow" hidden></span>
+          <span id="page-subtitle" hidden></span>
+        </div>
+        <div class="top-actions">
+          <div class="language-switch" role="group" aria-label="显示语言">
+            <button data-language="both" class="selected">对照</button>
+            <button data-language="0">语言 1</button>
+            <button data-language="1">语言 2</button>
+          </div>
+          <button class="button" id="bulk-content" title="批量粘贴素材">批量粘贴</button>
+          <button class="button primary" id="new-content" title="新建内容 (Ctrl+N)"><span>＋</span> 新建内容</button>
+          <button class="icon-button" id="theme-toggle" title="切换深色/浅色模式" aria-label="切换深色模式">🌙</button>
+          <button class="icon-button" id="settings-button" title="打开设置" aria-label="设置">⚙</button>
+        </div>
+      </header>
+      <section class="content-area">
+        <div class="toolbar"><div class="filter-tabs"><button class="filter selected" data-filter="all">全部</button><button class="filter" data-filter="favorites">☆ 收藏</button><button class="filter" data-filter="missing-second">待补 <span id="missing-language-name">语言 2</span> <span class="filter-count" id="missing-language-count">0</span></button></div><div class="toolbar-actions"><button class="button primary batch-translate" id="batch-translate" type="button" hidden></button><select id="tag-filter" aria-label="按标签筛选"><option value="">所有标签</option></select><select id="sort-items" aria-label="素材排序"><option value="manual">手动排序</option><option value="updated">最近编辑</option><option value="title">标题顺序</option><option value="popular">复制最多</option></select><div class="text-size-controls" role="group" aria-label="素材正文文字大小"><button id="text-size-smaller" type="button" aria-label="缩小素材文字" title="缩小素材文字">A−</button><output id="text-size-value">100%</output><button id="text-size-larger" type="button" aria-label="放大素材文字" title="放大素材文字">A+</button></div><button class="text-button" id="include-descendants" type="button" aria-pressed="false" hidden>包含子分类</button><button class="text-button" id="start-category-flow" type="button" hidden>按步骤浏览</button><button class="text-button" id="selection-mode">多选</button><button class="text-button" id="expand-all">全部展开 <span class="expand-chevron" aria-hidden="true"></span></button></div></div>
+        <div id="category-flow" class="category-flow" hidden>
+          <div class="category-flow-top">
+            <div class="category-flow-title-row">
+              <span class="category-flow-badge">🎯 场景流程</span>
+              <strong id="category-flow-scenario" class="category-flow-scenario"></strong>
+              <span id="category-flow-step" class="category-flow-step-text"></span>
+            </div>
+            <div class="category-flow-actions">
+              <label class="flow-auto-advance" title="复制本步话术后自动跳到下一步">
+                <input id="flow-auto-next" type="checkbox"> 复制后自动下一步
+              </label>
+              <button id="category-flow-prev" class="button" type="button">← 上一步</button>
+              <button id="category-flow-next" class="button primary" type="button">下一步 →</button>
+              <button id="category-flow-exit" class="text-button" type="button">退出流程</button>
+            </div>
+          </div>
+          <div id="category-flow-stepper" class="category-flow-stepper"></div>
+        </div>
+        <div id="active-filters" class="active-filters" hidden aria-label="当前筛选条件"></div>
+        <div id="translation-batch-status" class="translation-batch-status" hidden aria-live="polite"><div class="translation-batch-info"><strong id="translation-batch-title"></strong><span id="translation-batch-detail"></span><progress id="translation-batch-progress" max="1" value="0"></progress></div><div class="translation-batch-actions"><button id="retry-translation-failures" class="text-button" type="button">重试失败</button><button id="continue-translation-batch" class="button" type="button">继续剩余</button><button id="stop-translation-batch" class="text-button" type="button">停止</button><button id="dismiss-translation-batch" class="text-button" type="button" aria-label="关闭批量翻译状态">×</button></div></div>
+        <div id="selection-toolbar" class="selection-toolbar" hidden><strong id="selection-count">已选 0 项</strong><button id="select-visible" class="button" type="button">全选当前</button><select id="bulk-item-category" aria-label="移动所选素材到分类"><option value="">移动到分类…</option></select><button id="bulk-add-tags" class="button" type="button">添加标签</button><button id="bulk-favorite" class="button" type="button">收藏所选</button><button id="bulk-delete" class="button danger" type="button">删除</button><button id="selection-done" class="text-button" type="button">完成</button></div>
+        <section id="bulk-editor" class="bulk-composer" hidden>
+          <div class="bulk-head"><div><strong>批量粘贴素材</strong><p>每条首行作为标题；用单独一行 <code>---</code> 分开第二种语言，再用 <code>===</code> 分隔下一条。</p></div><button id="close-bulk" class="icon-button" type="button" aria-label="关闭">×</button></div>
+          <label class="bulk-category">添加到分类 <select id="bulk-category"></select></label>
+          <textarea id="bulk-input" placeholder="素材标题 1\n语言 1 内容\n---\n语言 2 内容\n===\n素材标题 2\n语言 1 内容" spellcheck="false"></textarea>
+          <div class="bulk-preview"><span id="bulk-count">粘贴内容后显示识别结果</span><div id="bulk-preview-list"></div></div>
+          <div class="bulk-footer"><span>图片可在导入后拖入对应素材卡片</span><button class="button primary" id="bulk-import" type="button" disabled>导入素材</button></div>
+        </section>
+        <section id="editor" class="inline-composer" hidden>
+          <form id="content-form">
+            <div class="composer-top"><span id="dialog-title">新素材</span><select id="item-type-input" aria-label="内容类型"><option value="script">双语话术</option><option value="document">纯文档</option><option value="checklist">待办清单</option></select><select id="category-input" aria-label="分类"></select><button class="icon-button" id="cancel-content" type="button" title="关闭，内容已自动保存">×</button></div>
+            <input type="hidden" id="item-id">
+            <div id="title-input" class="draft-title" contenteditable="true" data-placeholder="点击写标题；也可以在这里粘贴整段素材"></div>
+            <div class="draft-language"><div class="draft-language-head"><span id="language-label-0">语言 1</span><button class="text-button translate-button" data-translate-draft="0" type="button" hidden></button></div><div id="language-input-0" class="draft-text" contenteditable="true" data-placeholder="点击输入或直接粘贴"></div></div>
+            <div class="draft-language" id="second-language-field" hidden><div class="draft-language-head"><span id="language-label-1">语言 2</span><div><button class="text-button translate-button" data-translate-draft="1" type="button" hidden></button><button class="remove-language" id="remove-draft-language" type="button" title="移除语言 2" aria-label="移除语言 2">×</button></div></div><div id="language-input-1" class="draft-text" contenteditable="true" data-placeholder="点击输入或直接粘贴"></div></div>
+            <button id="add-second-language" class="text-button" type="button">＋ 添加第二种语言</button><button id="translate-add-language" class="text-button translate-button" type="button" hidden></button>
+            <span class="template-help">变量可写成 {{姓名}}，复制时填写</span>
+            <label id="task-list-field" class="task-list-field" hidden><span>任务清单</span><textarea id="task-list-input" rows="4" placeholder="每行一项任务，回车添加下一项"></textarea></label>
+            <input id="tags-input" class="tag-input" placeholder="＋ 添加标签（可选，用逗号分隔）">
+            <button id="image-picker" class="text-button image-picker" type="button">▧ 添加图片</button><input id="image-input" type="file" accept="image/*" multiple hidden>
+            <div id="image-list" class="image-list"></div>
+            <div class="composer-bottom"><span id="save-status">输入即自动保存 · 可粘贴整段，用 --- 分开两种语言</span><button class="button" id="finish-content" type="button">完成</button></div>
+          </form>
+        </section>
+        <div id="cards" class="cards"></div>
+        <div id="empty" class="empty-state" hidden></div>
+      </section>
+      </div>
+      <section id="settings-page" class="settings-page" hidden>
+        <header class="settings-header"><div><p class="eyebrow">CLIPNEST PREFERENCES</p><h1>设置</h1><p>管理显示偏好、语言、AI 翻译与本机数据。</p></div><button id="settings-back" class="button" type="button">← 返回素材库</button></header>
+        <div class="settings-layout">
+          <nav class="settings-nav" aria-label="设置分栏">
+            <button type="button" data-settings-section="general" class="selected" aria-pressed="true">常规</button>
+            <button type="button" data-settings-section="language">语言</button>
+            <button type="button" data-settings-section="ai">AI 翻译</button>
+            <button type="button" data-settings-section="data">数据与备份</button>
+            <button type="button" data-settings-section="help">快捷键与关于</button>
+          </nav>
+          <div class="settings-content">
+            <section class="settings-panel" data-settings-panel="general">
+              <div class="settings-panel-heading"><h2>常规</h2><p>调整界面语言、主题和素材卡片密度。</p></div>
+              <article class="settings-card"><div class="setting-copy"><h3>界面语言</h3><p>只更改应用按钮与菜单，不改变素材内容语言。</p></div><div class="settings-segmented" role="group" aria-label="界面语言"><button type="button" data-ui-language="zh-CN">简体中文</button><button type="button" data-ui-language="en">English</button><button type="button" data-ui-language="fr">Français</button></div></article>
+              <article class="settings-card"><div class="setting-copy"><h3>外观模式</h3><p>选择浅色、深色，或跟随 Windows 操作系统外观偏好。</p></div><div class="settings-segmented" role="group" aria-label="外观模式"><button type="button" data-color-scheme-option="auto">跟随系统</button><button type="button" data-color-scheme-option="light">浅色</button><button type="button" data-color-scheme-option="dark">深色</button></div></article>
+              <article class="settings-card"><div class="setting-copy"><h3>素材卡片密度</h3><p>控制素材卡片之间的留白，不影响文字内容。</p></div><div class="settings-segmented"><button type="button" data-density="comfortable">舒适</button><button type="button" data-density="compact">紧凑</button></div></article>
+              <article class="settings-card"><div class="setting-copy"><h3>主题颜色</h3><p>更改界面的强调色，立即应用并保存在此设备。</p></div><div class="theme-options" role="group" aria-label="选择主题颜色"><button type="button" class="theme-option" data-theme-option="green"><span class="theme-swatch theme-swatch-green"></span>森林绿</button><button type="button" class="theme-option" data-theme-option="blue"><span class="theme-swatch theme-swatch-blue"></span>海岸蓝</button><button type="button" class="theme-option" data-theme-option="purple"><span class="theme-swatch theme-swatch-purple"></span>薰衣草</button><button type="button" class="theme-option" data-theme-option="terracotta"><span class="theme-swatch theme-swatch-terracotta"></span>暖陶色</button></div></article>
+            </section>
+            <section class="settings-panel" data-settings-panel="language" hidden>
+              <div class="settings-panel-heading"><h2>语言</h2><p>设置内容语言名称和默认显示方式。</p></div>
+              <form id="language-form" class="settings-card language-settings-form">
+                <label class="field-label">语言 1<select id="language-name-0" required></select></label>
+                <label class="field-label">语言 2<select id="language-name-1" required></select></label>
+                <p class="settings-note">名称会用于素材卡片、编辑区域和复制提示，不会改动已有内容。</p>
+                <div class="settings-actions"><button class="button primary" type="submit" value="save">保存语言名称</button></div>
+              </form>
+              <article class="settings-card"><div class="setting-copy"><h3>语言显示方式</h3><p>也可以随时在素材库顶部切换。</p></div><div class="settings-segmented"><button type="button" data-setting-language="both" data-language="both">对照</button><button type="button" data-setting-language="0" data-language="0">语言 1</button><button type="button" data-setting-language="1" data-language="1">语言 2</button></div></article>
+              <p class="settings-note">双语话术默认只有语言 1；纯文档和待办清单不参与语言对照或 AI 翻译。</p>
+            </section>
+            <section class="settings-panel" data-settings-panel="ai" hidden>
+              <div class="settings-panel-heading"><h2>AI 翻译</h2><p>配置一次后，可在只有一种语言的素材中一键补全另一种语言。</p></div>
+              <form id="ai-settings-form" class="settings-card ai-settings-form">
+                <label class="field-label">服务商<select id="ai-provider"><option value="openai">OpenAI</option><option value="deepseek">DeepSeek</option><option value="gemini">Google Gemini</option><option value="qwen">通义千问</option><option value="groq">Groq</option><option value="custom">自定义 OpenAI 兼容接口</option></select></label>
+                <label class="field-label" id="ai-base-url-field">Base URL<input id="ai-base-url" type="url" required placeholder="https://api.example.com/v1"></label>
+                <label class="field-label">模型名称<span class="model-select-row"><input id="ai-model" list="ai-model-options" required autocomplete="off"><datalist id="ai-model-options"></datalist><button id="load-ai-models" class="button" type="button">加载模型</button></span></label>
+                <label class="field-label">API Key<input id="ai-key" type="password" autocomplete="new-password" placeholder="留空表示保留已保存的 Key"></label>
+                <p class="settings-note">翻译文本会发送给所选服务商并可能产生费用。Key 使用 Windows 用户加密单独保存在本机，不进入素材备份。自定义地址请使用可信的 HTTPS 服务。</p>
+                <div class="ai-settings-footer"><span id="ai-key-status" class="storage-status"><span class="status-dot"></span>尚未保存 API Key</span><div class="settings-actions"><button id="delete-ai-key" class="button" type="button" hidden>删除已保存的 Key</button><button class="button primary" type="submit">保存 AI 设置</button></div></div>
+              </form>
+            </section>
+            <section class="settings-panel" data-settings-panel="data" hidden>
+              <div class="settings-panel-heading"><h2>数据与备份</h2><p>素材保存在本机。定期导出备份，可在其他设备迁移或恢复数据。</p></div>
+              <article class="settings-card storage-card"><div class="setting-copy"><h3>本机资料概况</h3><p><span id="settings-item-count">0 条素材</span><span class="settings-separator">·</span><span id="settings-category-count">0 个分类</span><span class="settings-separator">·</span><span id="settings-image-count">0 张图片</span></p></div><span class="storage-status"><span class="status-dot"></span>仅保存在此设备</span></article>
+              <article class="settings-card"><div class="setting-copy"><h3>备份文件</h3><p>导出包含分类、文字和图片的 JSON 文件；导入前会确认并保留恢复点。</p></div><div class="settings-actions"><button id="export-data" class="button" type="button">导出备份</button><button id="import-data" class="button" type="button">导入备份</button><input id="backup-file" type="file" accept="application/json,.json" hidden></div></article>
+              <article class="settings-card version-settings-card"><div class="setting-copy"><h3>本地版本历史</h3><p>恢复点最多保留 10 个，保存在此设备并包含关联图片。</p></div><button id="create-version" class="button" type="button">创建恢复点</button><div id="version-list" class="settings-version-list"></div></article>
+            </section>
+            <section class="settings-panel" data-settings-panel="help" hidden>
+              <div class="settings-panel-heading"><h2>快捷键与关于</h2><p>常用操作可以直接通过键盘完成。</p></div>
+              <article class="settings-card shortcut-card"><div class="setting-copy"><h3>快捷键</h3></div><div class="shortcut-list"><div><span>搜索内容</span><kbd>Ctrl K</kbd></div><div><span>新建内容</span><kbd>Ctrl N</kbd></div><div><span>完成当前编辑</span><kbd>Ctrl Enter</kbd></div></div></article>
+              <article class="settings-card"><div class="setting-copy"><h3>关于 ClipNest</h3><p>ClipNest 是本机使用的话术与素材库。内容与图片不会自动上传到云端。</p></div><span class="app-version">版本 0.1.4</span></article>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <dialog id="category-move-dialog"><form method="dialog" id="category-move-form"><div class="dialog-head"><div><p class="eyebrow">CATEGORY</p><h2>移动分类</h2></div><button class="icon-button" value="cancel" aria-label="关闭">×</button></div><label class="field-label">移动到<select id="category-parent-select"></select></label><div class="dialog-actions"><button class="button" value="cancel">取消</button><button class="button primary" id="category-move-save" value="move">移动</button></div></form></dialog>
+  <dialog id="category-remove-dialog"><form method="dialog" id="category-remove-form"><div class="dialog-head"><div><p class="eyebrow">CATEGORY</p><h2>确认删除分类</h2></div><button class="icon-button" value="cancel" aria-label="关闭">×</button></div><p id="category-remove-name" class="category-delete-note"></p><p class="category-delete-note">分类里的素材会保留并转为未分类，子分类会提升到上一级。</p><div class="dialog-actions"><button class="button" value="cancel">取消</button><button class="button primary danger" id="category-remove-confirm" value="remove">删除分类</button></div></form></dialog>
+  <dialog id="category-delete-dialog"><form method="dialog" id="category-delete-form"><div class="dialog-head"><div><p class="eyebrow">CATEGORY</p><h2>删除并合并分类</h2></div><button class="icon-button" value="cancel" aria-label="关闭">×</button></div><p id="category-delete-name" class="category-delete-note"></p><label class="field-label">合并到<select id="category-delete-target"></select></label><div class="dialog-actions"><button class="button" value="cancel">取消</button><button class="button primary" id="category-delete-confirm" value="delete">合并并删除</button></div></form></dialog>
+  <dialog id="input-dialog"><form method="dialog" id="input-dialog-form"><div class="dialog-head"><h2 id="input-dialog-title"></h2><button class="icon-button" type="button" data-input-cancel aria-label="关闭">×</button></div><label class="field-label"><span id="input-dialog-hint"></span><input id="input-dialog-value" autocomplete="off"></label><div id="input-dialog-icon-row" class="input-dialog-icon-row" hidden><button id="input-dialog-icon" type="button" aria-label="选择分类图标">▱</button><span>分类图标（可选）</span></div><div class="dialog-actions"><button class="button" type="button" data-input-cancel>取消</button><button class="button primary" value="save">确定</button></div></form></dialog>
+  <dialog id="confirm-dialog"><form method="dialog" id="confirm-form"><div class="dialog-head"><h2 id="confirm-dialog-title">确认操作</h2><button class="icon-button" value="cancel" aria-label="关闭">×</button></div><p id="confirm-dialog-message" class="category-delete-note"></p><div class="dialog-actions"><button class="button" value="cancel">取消</button><button class="button primary danger" id="confirm-dialog-btn" value="confirm">确定</button></div></form></dialog>
+  <dialog id="bulk-delete-dialog"><form method="dialog" id="bulk-delete-form"><div class="dialog-head"><h2 id="bulk-delete-title">删除所选素材？</h2><button class="icon-button" value="cancel" aria-label="关闭">×</button></div><p id="bulk-delete-note" class="category-delete-note"></p><div class="dialog-actions"><button class="button" value="cancel">取消</button><button class="button primary danger" id="bulk-delete-confirm" value="delete">删除</button></div></form></dialog>
+  <dialog id="remove-language-dialog"><form method="dialog" id="remove-language-form"><div class="dialog-head"><h2>移除语言 2？</h2><button class="icon-button" value="cancel" aria-label="关闭">×</button></div><p class="category-delete-note">语言 2 已有内容，移除后这部分内容也会删除。</p><div class="dialog-actions"><button class="button" value="cancel">取消</button><button class="button primary danger" value="remove">移除</button></div></form></dialog>
+  <dialog id="batch-translate-dialog"><form method="dialog"><div class="dialog-head"><h2>批量 AI 翻译</h2><button class="icon-button" value="cancel" aria-label="关闭">×</button></div><p id="batch-translate-note" class="category-delete-note"></p><div class="dialog-actions"><button class="button" value="cancel">取消</button><button class="button primary" value="start">开始翻译</button></div></form></dialog>
+  <dialog id="template-dialog"><form method="dialog" id="template-form"><div class="dialog-head"><div><p class="eyebrow">PERSONALIZE</p><h2>填写话术内容</h2></div><button class="icon-button" value="cancel" aria-label="关闭">×</button></div><p class="category-delete-note">请填写每个变量后再复制；原素材不会改变。</p><div id="template-fields"></div><label class="field-label">复制预览<pre id="template-preview"></pre></label><div class="dialog-actions"><button class="button" value="cancel">取消</button><button class="button primary" value="copy">复制内容</button></div></form></dialog>
+  <section id="icon-picker" class="icon-picker" role="dialog" aria-label="选择图标" hidden><div class="icon-picker-top"><div class="icon-picker-tabs"><button type="button" data-icon-tab="emoji" class="selected">表情</button><button type="button" data-icon-tab="symbol">符号</button></div><button id="reset-picked-icon" type="button">恢复默认</button></div><input id="icon-picker-search" type="search" placeholder="搜索或粘贴表情" autocomplete="off"><div id="icon-picker-grid" class="icon-picker-grid"></div></section>
+  <dialog id="image-preview"><img id="image-preview-content" alt="素材大图"></dialog>
+  <div id="text-format-toolbar" class="text-format-toolbar" role="toolbar" aria-label="文字格式" hidden>
+    <button type="button" data-format-command="bold" aria-label="加粗选中文字" title="加粗"><strong>B</strong></button>
+    <span class="format-toolbar-divider" aria-hidden="true"></span>
+    <label class="format-picker" title="自选文字颜色"><span class="format-text-color-icon">A</span><input type="color" data-format-picker="color" value="#477554" aria-label="自选文字颜色"></label>
+    <label class="format-picker" title="自选文字底色"><span class="format-bg-color-icon">▰</span><input type="color" data-format-picker="bg" value="#fff09a" aria-label="自选文字底色"></label>
+    <span class="format-toolbar-divider" aria-hidden="true"></span>
+    <button type="button" class="format-color" data-format-command="color" data-text-color="#477554" aria-label="绿色文字" title="绿色文字"><span style="--format-color:#477554"></span></button>
+    <button type="button" class="format-color" data-format-command="color" data-text-color="#3975a4" aria-label="蓝色文字" title="蓝色文字"><span style="--format-color:#3975a4"></span></button>
+    <button type="button" class="format-color" data-format-command="color" data-text-color="#c34646" aria-label="红色文字" title="红色文字"><span style="--format-color:#c34646"></span></button>
+    <button type="button" class="format-color" data-format-command="color" data-text-color="#b86a16" aria-label="橙色文字" title="橙色文字"><span style="--format-color:#b86a16"></span></button>
+    <button type="button" class="format-color" data-format-command="color" data-text-color="#7650a3" aria-label="紫色文字" title="紫色文字"><span style="--format-color:#7650a3"></span></button>
+    <span class="format-toolbar-divider" aria-hidden="true"></span>
+    <button type="button" data-format-command="undo" aria-label="撤销上一次文字格式" title="撤销" disabled>↶</button>
+  </div>
+  <div id="image-context-menu" class="image-context-menu" popover="manual" role="menu" aria-label="图片操作">
+    <button type="button" role="menuitem" data-image-menu-action="copy">复制图片</button>
+    <button type="button" role="menuitem" data-image-menu-action="download">下载图片</button>
+    <button type="button" role="menuitem" data-image-menu-action="preview">打开预览</button>
+    <span class="image-menu-divider" role="separator"></span>
+    <button type="button" role="menuitem" class="danger-action" data-image-menu-action="remove">从素材移除</button>
+  </div>
+  <div id="toast" role="status" aria-live="polite"><span id="toast-message"></span><button id="toast-action" type="button" hidden></button></div>
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
