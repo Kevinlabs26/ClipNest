@@ -3,6 +3,64 @@
 use std::{fs, time::Duration};
 use tauri::{AppHandle, Manager};
 
+const RELEASES_API: &str = "https://api.github.com/repos/Kevinlabs26/ClipNest/releases/latest";
+const RELEASES_PAGE: &str = "https://github.com/Kevinlabs26/ClipNest/releases/latest";
+
+fn version_is_newer(latest: &str, current: &str) -> bool {
+    let parse = |version: &str| {
+        version
+            .trim_start_matches('v')
+            .split('.')
+            .map(str::parse::<u64>)
+            .collect::<Result<Vec<_>, _>>()
+    };
+    match (parse(latest), parse(current)) {
+        (Ok(latest), Ok(current)) if latest.len() == 3 && current.len() == 3 => latest > current,
+        _ => false,
+    }
+}
+
+#[tauri::command]
+async fn check_for_update() -> Result<Option<String>, String> {
+    let response = reqwest::Client::builder()
+        .timeout(Duration::from_secs(8))
+        .user_agent(format!("ClipNest/{}", env!("CARGO_PKG_VERSION")))
+        .build()
+        .map_err(|_| "无法初始化更新检查".to_string())?
+        .get(RELEASES_API)
+        .send()
+        .await
+        .map_err(|_| "暂时无法检查更新".to_string())?;
+    if !response.status().is_success() {
+        return Err("暂时无法检查更新".into());
+    }
+    let release: serde_json::Value = response
+        .json()
+        .await
+        .map_err(|_| "更新信息格式无效".to_string())?;
+    let tag = release
+        .get("tag_name")
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or_default();
+    Ok(version_is_newer(tag, env!("CARGO_PKG_VERSION")).then(|| tag.to_string()))
+}
+
+#[tauri::command]
+fn open_latest_release() -> Result<(), String> {
+    #[cfg(windows)]
+    {
+        std::process::Command::new("rundll32.exe")
+            .args(["url.dll,FileProtocolHandler", RELEASES_PAGE])
+            .spawn()
+            .map(|_| ())
+            .map_err(|_| "无法打开 GitHub Releases 页面".to_string())
+    }
+    #[cfg(not(windows))]
+    {
+        Err("打开更新页面目前仅支持 Windows".into())
+    }
+}
+
 #[cfg(windows)]
 use windows_sys::Win32::{
     Foundation::{LocalFree, HLOCAL},
@@ -231,6 +289,8 @@ async fn translate_text(
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
+            check_for_update,
+            open_latest_release,
             has_ai_key,
             save_ai_key,
             delete_ai_key,

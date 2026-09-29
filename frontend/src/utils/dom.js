@@ -121,7 +121,7 @@ export function errorMessage(error, fallback = '操作失败') {
 let toastTimer = null;
 
 // Display a transient toast notification
-export function toast(message, actionLabel = '', onAction = null) {
+export function toast(message, actionLabel = '', onAction = null, duration = 3200) {
   const toastEl = $('#toast');
   const messageEl = $('#toast-message');
   const actionBtn = $('#toast-action');
@@ -145,5 +145,5 @@ export function toast(message, actionLabel = '', onAction = null) {
   toastEl.classList.add('visible');
   toastTimer = setTimeout(() => {
     toastEl.classList.remove('visible');
-  }, 3200);
+  }, duration);
 }

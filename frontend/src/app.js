@@ -1,6 +1,6 @@
 import { $, $$, toast, setUiLanguage } from './utils/dom.js';
 import { extractVariables, renderTemplate, richTextValue } from './utils/text.js';
-import { writeTextToClipboard, writeImageToClipboard } from './utils/clipboard.js';
+import { nativeInvoke, writeTextToClipboard, writeImageToClipboard } from './utils/clipboard.js';
 import { store, state, persist, markEdited } from './state/store.js';
 import { updateColorScheme, updateTheme, updateDensity, updateContentTextSize, updateSidebarState, setSidebarCollapsed } from './state/theme.js';
 import { checkAiKey, requestSingleTranslation, TranslationBatchController } from './services/aiService.js';
@@ -739,6 +739,11 @@ export async function initApp() {
     renderAppView();
   });
   renderAppView();
+  nativeInvoke('check_for_update')
+    .then(version => {
+      if (version) toast(`发现新版本 ${version}`, '查看更新', () => nativeInvoke('open_latest_release'), 15000);
+    })
+    .catch(() => {});
 }
 
 if (document.readyState === 'loading') {

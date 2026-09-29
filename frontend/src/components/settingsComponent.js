@@ -162,6 +162,7 @@ export function setupSettingsEventListeners() {
       return;
     }
     if (colorSchemeBtn) {
+      event.stopPropagation();
       const previous = state.preferences.colorScheme;
       state.preferences.colorScheme = colorSchemeBtn.dataset.colorSchemeOption;
       if (!persist()) { state.preferences.colorScheme = previous; renderSettingsPage(); return; }
@@ -170,6 +171,7 @@ export function setupSettingsEventListeners() {
       return;
     }
     if (densityBtn) {
+      event.stopPropagation();
       const previous = state.preferences.density;
       state.preferences.density = densityBtn.dataset.density;
       if (!persist()) { state.preferences.density = previous; renderSettingsPage(); return; }
@@ -178,6 +180,7 @@ export function setupSettingsEventListeners() {
       return;
     }
     if (themeBtn) {
+      event.stopPropagation();
       const previous = state.preferences.theme;
       state.preferences.theme = themeBtn.dataset.themeOption;
       if (!persist()) { state.preferences.theme = previous; renderSettingsPage(); return; }
@@ -186,12 +189,14 @@ export function setupSettingsEventListeners() {
       return;
     }
     if (uiLangBtn) {
+      event.stopPropagation();
       const previous = state.preferences.uiLanguage;
       state.preferences.uiLanguage = uiLangBtn.dataset.uiLanguage;
       if (!persist()) { state.preferences.uiLanguage = previous; renderSettingsPage(); return; }
       renderSettingsPage();
+      toast(`✓ ${uiLangBtn.textContent}`);
     }
-  });
+  }, true);
 
   $('#language-form')?.addEventListener('submit', event => {
     event.preventDefault();
