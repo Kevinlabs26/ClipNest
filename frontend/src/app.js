@@ -11,7 +11,7 @@ import { renderCards, handleCardAction, setupTextFormattingToolbar } from './com
 import { openEditor, closeEditor, setupEditorEventListeners, filesToImages, positionEditor } from './components/editorComponent.js';
 import { openBulkEditor, setupBulkEditorEventListeners } from './components/bulkEditorComponent.js';
 import { createCategory, askInput, renameCategory, openCategoryMove, openCategoryRemove, openCategoryDelete, openIconPicker, closeIconPicker, openImagePreview, promptTemplateValues, setupDialogEventListeners } from './components/dialogsComponent.js';
-import { openSettings, closeSettings, isSettingsOpen, renderSettingsPage, setupSettingsEventListeners } from './components/settingsComponent.js';
+import { openSettings, closeSettings, isSettingsOpen, renderSettingsPage, setupSettingsEventListeners, checkForUpdates } from './components/settingsComponent.js';
 import { renderToolbar, toggleSelectionMode, toggleExpandAll, toggleItemSelection, setupToolbarEventListeners } from './components/toolbarComponent.js';
 
 let isAiConfigured = false;
@@ -741,11 +741,7 @@ export async function initApp() {
     renderAppView();
   });
   renderAppView();
-  nativeInvoke('check_for_update')
-    .then(version => {
-      if (version) toast(`${uiText('发现新版本')} ${version}`, uiText('查看更新'), () => nativeInvoke('open_latest_release'), 15000);
-    })
-    .catch(() => {});
+  checkForUpdates(true);
 }
 
 if (document.readyState === 'loading') {

@@ -5,10 +5,39 @@ import { checkAiKey, setAiKey, deleteAiKey, fetchModels } from '../services/aiSe
 import { AI_PROVIDERS } from '../services/storageService.js';
 import { exportBackupFile, readBackupFile, listRestorePoints, saveRestorePoint, restoreFromPoint, importBackupFile } from '../services/backupService.js';
 import { askConfirm } from './confirmComponent.js';
+import { nativeInvoke } from '../utils/clipboard.js';
 
 let isSettingsVisible = false;
 let currentSettingsSection = 'general';
+let updateStatus = 'idle';
+let availableVersion = '';
 const LANGUAGE_OPTIONS = ['中文', 'English', '日本語', '한국어', 'Español', 'Français', 'Deutsch', 'Русский'];
+
+function renderUpdateStatus() {
+  const status = $('#update-status');
+  const checkButton = $('#check-for-updates');
+  const viewButton = $('#view-update');
+  if (status) status.textContent = updateStatus === 'available'
+    ? `${uiText('发现新版本')} ${availableVersion}`
+    : uiText({ idle: '尚未检查更新', checking: '正在检查更新…', current: '已是最新版本', error: '检查更新失败，请检查网络连接' }[updateStatus]);
+  if (checkButton) checkButton.disabled = updateStatus === 'checking';
+  if (viewButton) viewButton.hidden = updateStatus !== 'available';
+}
+
+export async function checkForUpdates(notify = false) {
+  if (updateStatus === 'checking') return;
+  updateStatus = 'checking';
+  renderUpdateStatus();
+  try {
+    availableVersion = await nativeInvoke('check_for_update') || '';
+    updateStatus = availableVersion ? 'available' : 'current';
+    if (availableVersion && notify) toast(`${uiText('发现新版本')} ${availableVersion}`, uiText('查看更新'), () => nativeInvoke('open_latest_release'), 15000);
+  } catch {
+    availableVersion = '';
+    updateStatus = 'error';
+  }
+  renderUpdateStatus();
+}
 
 export function isSettingsOpen() {
   return isSettingsVisible;
@@ -108,6 +137,7 @@ export function renderSettingsPage() {
     const totalImgCount = new Set(state.items.flatMap(i => i.images || [])).size;
     imgCountEl.textContent = `${totalImgCount} ${uiText('张图片')}`;
   }
+  renderUpdateStatus();
   refreshAiKeyStatus();
 }
 
@@ -144,6 +174,8 @@ export async function renderVersionList() {
 }
 
 export function setupSettingsEventListeners() {
+  $('#check-for-updates')?.addEventListener('click', () => checkForUpdates());
+  $('#view-update')?.addEventListener('click', () => nativeInvoke('open_latest_release').catch(err => toast(errorMessage(err))));
   $('#settings-page')?.addEventListener('click', async event => {
     const navTab = event.target.closest('[data-settings-section]');
     const backBtn = event.target.closest('#settings-back');
