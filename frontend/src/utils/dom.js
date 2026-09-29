@@ -13,6 +13,15 @@ export function $$(selector, scope = document) {
 // Localized UI text dictionary for system UI
 export const UI_TEXTS = {
   'zh-CN': {
+    '设置': '设置', '管理显示偏好、语言、AI 翻译与本机数据。': '管理显示偏好、语言、AI 翻译与本机数据。', '← 返回素材库': '← 返回素材库',
+    '常规': '常规', '语言': '语言', 'AI 翻译': 'AI 翻译', '数据与备份': '数据与备份', '快捷键与关于': '快捷键与关于',
+    '调整界面语言、主题和素材卡片密度。': '调整界面语言、主题和素材卡片密度。', '界面语言': '界面语言',
+    '只更改应用按钮与菜单，不改变素材内容语言。': '只更改应用按钮与菜单，不改变素材内容语言。', '外观模式': '外观模式',
+    '选择浅色、深色，或跟随 Windows 操作系统外观偏好。': '选择浅色、深色，或跟随 Windows 操作系统外观偏好。',
+    '跟随系统': '跟随系统', '浅色': '浅色', '深色': '深色', '素材卡片密度': '素材卡片密度',
+    '控制素材卡片之间的留白，不影响文字内容。': '控制素材卡片之间的留白，不影响文字内容。', '舒适': '舒适', '紧凑': '紧凑',
+    '主题颜色': '主题颜色', '更改界面的强调色，立即应用并保存在此设备。': '更改界面的强调色，立即应用并保存在此设备。',
+    '森林绿': '森林绿', '海岸蓝': '海岸蓝', '薰衣草': '薰衣草', '暖陶色': '暖陶色',
     '展开侧边栏': '展开侧边栏',
     '收起侧边栏': '收起侧边栏',
     '按步骤浏览': '按步骤浏览',
@@ -32,6 +41,15 @@ export const UI_TEXTS = {
     '知道了': '知道了'
   },
   'en': {
+    '设置': 'Settings', '管理显示偏好、语言、AI 翻译与本机数据。': 'Manage display, language, AI translation, and local data preferences.', '← 返回素材库': '← Back to library',
+    '常规': 'General', '语言': 'Language', 'AI 翻译': 'AI translation', '数据与备份': 'Data and backups', '快捷键与关于': 'Shortcuts and about',
+    '调整界面语言、主题和素材卡片密度。': 'Adjust the interface language, theme, and card spacing.', '界面语言': 'Interface language',
+    '只更改应用按钮与菜单，不改变素材内容语言。': 'Changes app controls and menus, not your saved content.', '外观模式': 'Appearance',
+    '选择浅色、深色，或跟随 Windows 操作系统外观偏好。': 'Choose light, dark, or follow your Windows appearance preference.',
+    '跟随系统': 'System', '浅色': 'Light', '深色': 'Dark', '素材卡片密度': 'Card spacing',
+    '控制素材卡片之间的留白，不影响文字内容。': 'Adjust the space between cards without changing their content.', '舒适': 'Comfortable', '紧凑': 'Compact',
+    '主题颜色': 'Accent color', '更改界面的强调色，立即应用并保存在此设备。': 'Change the interface accent color. It is applied and saved on this device.',
+    '森林绿': 'Forest green', '海岸蓝': 'Coastal blue', '薰衣草': 'Lavender', '暖陶色': 'Terracotta',
     '展开侧边栏': 'Expand sidebar',
     '收起侧边栏': 'Collapse sidebar',
     '按步骤浏览': 'Browse steps',
@@ -51,6 +69,15 @@ export const UI_TEXTS = {
     '知道了': 'OK'
   },
   'fr': {
+    '设置': 'Paramètres', '管理显示偏好、语言、AI 翻译与本机数据。': 'Gérez l’affichage, la langue, la traduction IA et les données locales.', '← 返回素材库': '← Retour à la bibliothèque',
+    '常规': 'Général', '语言': 'Langue', 'AI 翻译': 'Traduction IA', '数据与备份': 'Données et sauvegardes', '快捷键与关于': 'Raccourcis et à propos',
+    '调整界面语言、主题和素材卡片密度。': 'Réglez la langue, le thème et l’espacement des fiches.', '界面语言': 'Langue de l’interface',
+    '只更改应用按钮与菜单，不改变素材内容语言。': 'Modifie les commandes et menus, pas le contenu enregistré.', '外观模式': 'Apparence',
+    '选择浅色、深色，或跟随 Windows 操作系统外观偏好。': 'Choisissez clair, sombre ou le réglage de Windows.',
+    '跟随系统': 'Système', '浅色': 'Clair', '深色': 'Sombre', '素材卡片密度': 'Espacement des fiches',
+    '控制素材卡片之间的留白，不影响文字内容。': 'Réglez l’espace entre les fiches sans modifier leur contenu.', '舒适': 'Confortable', '紧凑': 'Compact',
+    '主题颜色': 'Couleur d’accent', '更改界面的强调色，立即应用并保存在此设备。': 'Change la couleur d’accent, appliquée et enregistrée sur cet appareil.',
+    '森林绿': 'Vert forêt', '海岸蓝': 'Bleu côtier', '薰衣草': 'Lavande', '暖陶色': 'Terre cuite',
     '展开侧边栏': 'Ouvrir la barre latérale',
     '收起侧边栏': 'Réduire la barre latérale',
     '按步骤浏览': 'Parcourir les étapes',

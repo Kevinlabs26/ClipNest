@@ -49,6 +49,8 @@ export function renderSettingsPage() {
   if (settingsEl) settingsEl.hidden = !isSettingsVisible;
   if (!isSettingsVisible) return;
 
+  $$('[data-ui-text]').forEach(el => { el.textContent = uiText(el.dataset.uiText); });
+
   $$('[data-settings-section]').forEach(btn => {
     const isSelected = btn.dataset.settingsSection === currentSettingsSection;
     btn.classList.toggle('selected', isSelected);
@@ -62,7 +64,7 @@ export function renderSettingsPage() {
   updateDensity(state.preferences.density);
   updateTheme(state.preferences.theme);
   updateSidebarState();
-  updateColorScheme();
+  updateColorScheme(state.preferences.colorScheme);
 
   $$('[data-density]').forEach(btn => {
     btn.classList.toggle('selected', btn.dataset.density === state.preferences.density);

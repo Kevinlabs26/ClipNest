@@ -3,7 +3,7 @@ import { $, uiText } from '../utils/dom.js';
 import { state, persist } from './store.js';
 
 // Apply color scheme tokens and update toggle indicators
-export function updateColorScheme(preferredScheme = 'auto') {
+export function updateColorScheme(preferredScheme = state.preferences?.colorScheme || 'auto') {
   const isSystemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   const effectiveDark = preferredScheme === 'dark' || (preferredScheme === 'auto' && isSystemDark);
   document.body.dataset.colorScheme = effectiveDark ? 'dark' : 'light';
