@@ -132,7 +132,7 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(3px); 
 .model-select-row .button { flex: 0 0 auto; min-height: 34px; padding: 0 10px; font-size: 13px; }
 .ai-settings-form .settings-note, .ai-settings-footer { grid-column: 1 / -1; }
 .ai-settings-form .settings-note { margin: 2px 0 0; }
-.ai-settings-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding-top: 13px; border-top: 1px solid var(--line-subtle); }
+.ai-settings-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; width: 100%; padding-top: 13px; border-top: 1px solid var(--line-subtle); }
 .ai-settings-footer .settings-actions { justify-content: flex-end; }
 .translate-button { padding: 3px 7px; border: 1px solid var(--line); border-radius: 5px; color: var(--accent-strong); white-space: nowrap; }
 .storage-card { flex-wrap: wrap; }

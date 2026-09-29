@@ -11,10 +11,10 @@ export function updateColorScheme(preferredScheme = state.preferences?.colorSche
   const toggleBtn = $('#theme-toggle');
   if (toggleBtn) {
     toggleBtn.textContent = effectiveDark ? '☀️' : '🌙';
-    const label = preferredScheme === 'auto'
+    const label = uiText(preferredScheme === 'auto'
       ? (effectiveDark ? '跟随系统 (深色)' : '跟随系统 (浅色)')
-      : (effectiveDark ? '深色模式' : '浅色模式');
-    toggleBtn.title = `切换外观模式 (当前: ${label})`;
+      : (effectiveDark ? '深色模式' : '浅色模式'));
+    toggleBtn.title = uiText('切换外观模式 (当前: {mode})').replace('{mode}', label);
     toggleBtn.setAttribute('aria-label', toggleBtn.title);
   }
 

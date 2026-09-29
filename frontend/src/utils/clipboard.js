@@ -1,10 +1,11 @@
 // Clipboard and Tauri native bridge utilities
 import { renderInlineMarkupForClipboard } from './text.js';
+import { uiText } from './dom.js';
 
 // Invoke Tauri Rust backend command with error handling
 export function nativeInvoke(command, args) {
   const invoke = window.__TAURI__?.core?.invoke;
-  if (!invoke) throw new Error('此功能需要在 ClipNest 桌面版中使用');
+  if (!invoke) throw new Error(uiText('此功能需要在 ClipNest 桌面版中使用'));
   return invoke(command, args);
 }
 

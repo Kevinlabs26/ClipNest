@@ -1,5 +1,5 @@
 // Controlled editor component for individual content items
-import { $, toast, uiText } from '../utils/dom.js';
+import { $, toast, uiText, displayLanguageName } from '../utils/dom.js';
 import { esc, highlight, richTextValue } from '../utils/text.js';
 import { state, persist, markEdited, renderAll } from '../state/store.js';
 import { storeImage, getImage } from '../services/storageService.js';
@@ -52,11 +52,12 @@ export function showSecondLanguage(shouldShow) {
 function updateEditorType(type) {
   const isScript = type === 'script';
   const isDocument = type === 'document';
-  const typeName = isScript ? '双语话术' : isDocument ? '纯文档' : '待办清单';
-  $('#dialog-title').textContent = `${$('#item-type-input').disabled ? '编辑' : '新建'}${typeName}`;
+  const typeName = uiText(isScript ? '双语话术' : isDocument ? '纯文档' : '待办清单');
+  $('#dialog-title').textContent = `${uiText($('#item-type-input').disabled ? '编辑' : '新建')} ${typeName}`;
   const languageField = $('#language-input-0')?.closest('.draft-language');
   if (languageField) languageField.hidden = type === 'checklist';
-  $('#language-label-0').textContent = isDocument ? '正文' : state.languages[0];
+  $('#language-label-0').textContent = isDocument ? uiText('正文') : displayLanguageName(state.languages[0]);
+  $('#language-label-1').textContent = displayLanguageName(state.languages[1]);
   $('#second-language-field').hidden = !isScript || $('#second-language-field').dataset.enabled !== 'true';
   $('#add-second-language').hidden = !isScript || $('#second-language-field').dataset.enabled === 'true';
   $('#translate-add-language').hidden = true;
@@ -64,7 +65,7 @@ function updateEditorType(type) {
   $('.template-help').hidden = !isScript;
   $('#task-list-field').hidden = type !== 'checklist';
   $('#content-form')?.classList.toggle('has-second-language', isScript && !$('#second-language-field')?.hidden);
-  $('#save-status').textContent = type === 'checklist' ? '输入即自动保存 · 每行一项，勾选可标记完成' : '输入即自动保存';
+  $('#save-status').textContent = uiText(type === 'checklist' ? '输入即自动保存 · 每行一项，勾选可标记完成' : '输入即自动保存');
 }
 
 export function updateDraftTranslationControls() {
@@ -165,12 +166,12 @@ export async function renderDraftImages() {
     if (!blobData || !activeDraftImageIds.includes(imageId)) continue;
     const tileElement = document.createElement('div');
     tileElement.className = 'image-tile';
-    tileElement.title = '按住可拖拽调整顺序，点击可查看大图';
+    tileElement.title = uiText('按住可拖拽调整顺序，点击可查看大图');
 
     const imageElement = document.createElement('img');
     const objectUrl = URL.createObjectURL(blobData);
     imageElement.src = objectUrl;
-    imageElement.alt = '素材图片';
+    imageElement.alt = uiText('素材图片');
     imageElement.dataset.imageId = imageId;
     imageElement.dataset.itemId = activeEditingItemId;
 
@@ -190,7 +191,7 @@ export async function renderDraftImages() {
         if (item) { item.images = [...activeDraftImageIds]; markEdited(item); persist(); }
         renderDraftImages();
         syncDraft();
-        toast('✓ 已调整图片位置');
+        toast(uiText('✓ 已调整图片位置'));
       }
     });
 
@@ -198,7 +199,7 @@ export async function renderDraftImages() {
     removeBtn.type = 'button';
     removeBtn.textContent = '×';
     removeBtn.dataset.imageId = imageId;
-    removeBtn.setAttribute('aria-label', '移除图片');
+    removeBtn.setAttribute('aria-label', uiText('移除图片'));
     removeBtn.addEventListener('click', event => {
       event.stopPropagation();
       activeDraftImageIds = activeDraftImageIds.filter(id => id !== imageId);
@@ -210,7 +211,7 @@ export async function renderDraftImages() {
       }
       renderDraftImages();
       syncDraft();
-      toast('图片已移除');
+      toast(uiText('图片已移除'));
     });
 
     tileElement.append(imageElement, removeBtn);
@@ -220,7 +221,7 @@ export async function renderDraftImages() {
 
 export async function filesToImages(fileList, targetItem) {
   const imageFiles = [...fileList].filter(f => f.type.startsWith('image/'));
-  if (!imageFiles.length) return toast('请选择图片文件');
+  if (!imageFiles.length) return toast(uiText('请选择图片文件'));
   try {
     const savedIds = await Promise.all(imageFiles.map(f => storeImage(f)));
     if (targetItem) {
@@ -233,9 +234,9 @@ export async function filesToImages(fileList, targetItem) {
       renderDraftImages();
       syncDraft();
     }
-    toast(`✓ 已添加 ${savedIds.length} 张图片`);
+    toast(`${uiText('✓ 已添加')} ${savedIds.length} ${uiText('张图片')}`);
   } catch {
-    toast('图片保存失败，请重试');
+    toast(uiText('图片保存失败，请重试'));
   }
 }
 
@@ -277,15 +278,15 @@ export function syncDraft() {
 
   updateDraftTranslationControls();
   const statusEl = $('#save-status');
-  if (statusEl) statusEl.textContent = '保存中…';
+  if (statusEl) statusEl.textContent = uiText('保存中…');
   clearTimeout(draftAutoSaveTimerId);
   draftAutoSaveTimerId = setTimeout(() => {
-    if (statusEl) statusEl.textContent = persist() ? '已自动保存' : '保存失败，请先导出备份';
+    if (statusEl) statusEl.textContent = uiText(persist() ? '已自动保存' : '保存失败，请先导出备份');
   }, 250);
 }
 
 export function openEditor(existingItem, insertAfterId = '') {
-  if (!existingItem && !state.categories.length) return toast('请先创建分类');
+  if (!existingItem && !state.categories.length) return toast(uiText('请先创建分类'));
   const editorModal = $('#editor');
   if (!editorModal.hidden) closeEditor();
   const isNewItem = !existingItem;
@@ -329,7 +330,7 @@ export function openEditor(existingItem, insertAfterId = '') {
   originalItemImageIds = [...(currentItem.images || [])];
   activeDraftImageIds = [...originalItemImageIds];
   renderDraftImages();
-  $('#save-status').textContent = isNewItem ? (currentItem.type === 'checklist' ? '输入即自动保存 · 每行一项，勾选可标记完成' : '输入即自动保存') : '编辑内容会自动保存';
+  $('#save-status').textContent = uiText(isNewItem ? (currentItem.type === 'checklist' ? '输入即自动保存 · 每行一项，勾选可标记完成' : '输入即自动保存') : '编辑内容会自动保存');
   editorModal.hidden = false;
   renderAll();
   positionEditor();
@@ -345,7 +346,7 @@ export function closeEditor() {
     syncDraft();
     clearTimeout(draftAutoSaveTimerId);
     const hasContent = Boolean((currentItem.title || '').trim() || currentItem.translations.some(t => String(t || '').trim()) || currentItem.tasks?.length || currentItem.tags.length || currentItem.images.length);
-    if (hasContent) currentItem.title ||= '未命名素材';
+    if (hasContent) currentItem.title ||= uiText('未命名素材');
     else state.items = state.items.filter(entry => entry.id !== itemId);
     persist();
   }

@@ -1,5 +1,5 @@
 // Toolbar component: multi-select operations, expand-all toggle, and bulk batch actions
-import { $, $$, toast } from '../utils/dom.js';
+import { $, $$, toast, uiText } from '../utils/dom.js';
 import { esc, categoryPath } from '../utils/text.js';
 import { store, state, persist, markEdited, renderAll } from '../state/store.js';
 import { askConfirm } from './confirmComponent.js';
@@ -53,21 +53,21 @@ export function bulkFavoriteSelected() {
   });
   persist();
   renderAll();
-  toast(shouldFavorite ? '✓ 已批量收藏' : '✓ 已取消收藏');
+  toast(uiText(shouldFavorite ? '✓ 已批量收藏' : '✓ 已取消收藏'));
 }
 
 export async function bulkDeleteSelected() {
   const selectedIds = [...store.selectedItemIds];
   if (!selectedIds.length) return;
   const count = selectedIds.length;
-  const confirmed = await askConfirm(`确认批量删除所选的 ${count} 条素材？此操作不可撤销。`, '批量删除素材', '确认删除', true);
+  const confirmed = await askConfirm(uiText('确认批量删除所选的 {count} 条素材？此操作不可撤销。').replace('{count}', count), uiText('批量删除素材'), uiText('确认删除'), true);
   if (confirmed) {
     state.items = state.items.filter(item => !store.selectedItemIds.has(item.id));
     store.selectedItemIds.clear();
     store.selectionModeActive = false;
     persist();
     renderAll();
-    toast(`✓ 已批量删除 ${count} 条素材`);
+    toast(`${uiText('✓ 已批量删除')} ${count} ${uiText('条素材')}`);
   }
 }
 
@@ -81,7 +81,7 @@ export function bulkMoveSelected(destinationCategory) {
   state.lastCategory = destinationCategory;
   persist();
   renderAll();
-  toast(`✓ 已移动 ${chosenItems.length} 条素材至“${destinationCategory}”`);
+  toast(uiText('✓ 已移动 {count} 条素材至“{name}”').replace('{count}', chosenItems.length).replace('{name}', destinationCategory));
 }
 
 export function renderToolbar(visibleItems = []) {
@@ -93,37 +93,37 @@ export function renderToolbar(visibleItems = []) {
     selectionToolbarEl.hidden = !store.selectionModeActive;
   }
   if (selectionModeBtn) {
-    selectionModeBtn.textContent = store.selectionModeActive ? '退出多选' : '多选';
+    selectionModeBtn.textContent = uiText(store.selectionModeActive ? '退出多选' : '多选');
     selectionModeBtn.classList.toggle('selected', store.selectionModeActive);
   }
 
   const visibleIds = visibleItems.map(i => i.id);
   const isAllExpanded = visibleIds.length > 0 && visibleIds.every(id => state.expanded.includes(id));
   if (expandAllBtn) {
-    expandAllBtn.innerHTML = `全部${isAllExpanded ? '收起' : '展开'} <span class="expand-chevron ${isAllExpanded ? 'up' : ''}" aria-hidden="true"></span>`;
+    expandAllBtn.innerHTML = `${uiText(isAllExpanded ? '全部收起' : '全部展开')} <span class="expand-chevron ${isAllExpanded ? 'up' : ''}" aria-hidden="true"></span>`;
   }
 
   if (!store.selectionModeActive) return;
 
   const countEl = $('#selection-count');
-  if (countEl) countEl.textContent = `已选 ${store.selectedItemIds.size} 项`;
+  if (countEl) countEl.textContent = `${uiText('已选')} ${store.selectedItemIds.size} ${uiText('项')}`;
 
   const selectVisibleBtn = $('#select-visible');
   if (selectVisibleBtn) {
     const isAllVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => store.selectedItemIds.has(id));
-    selectVisibleBtn.textContent = isAllVisibleSelected ? '取消全选' : '全选当前';
+    selectVisibleBtn.textContent = uiText(isAllVisibleSelected ? '取消全选' : '全选当前');
   }
 
   const categorySelectEl = $('#bulk-item-category');
   if (categorySelectEl) {
-    categorySelectEl.innerHTML = '<option value="">移动到分类…</option>' +
+    categorySelectEl.innerHTML = `<option value="">${uiText('移动到分类…')}</option>` +
       state.categories.map(name => `<option value="${esc(name)}">${esc(categoryPath(name))}</option>`).join('');
   }
 
   const bulkFavBtn = $('#bulk-favorite');
   if (bulkFavBtn) {
     const chosen = state.items.filter(item => store.selectedItemIds.has(item.id));
-    bulkFavBtn.textContent = chosen.length && chosen.every(item => item.favorite) ? '取消收藏所选' : '收藏所选';
+    bulkFavBtn.textContent = uiText(chosen.length && chosen.every(item => item.favorite) ? '取消收藏所选' : '收藏所选');
   }
 
   selectionToolbarEl?.querySelectorAll('button:not(#select-visible):not(#selection-done)').forEach(btn => {

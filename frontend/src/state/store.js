@@ -1,6 +1,6 @@
 // Central application store and state dispatcher
 import { loadLibraryState, saveLibraryState } from '../services/storageService.js';
-import { toast } from '../utils/dom.js';
+import { toast, uiText } from '../utils/dom.js';
 import { categoryPath } from '../utils/text.js';
 
 class Store {
@@ -40,7 +40,7 @@ class Store {
     this.state.languageMode = this.language;
     const success = saveLibraryState(this.state);
     if (!success) {
-      toast('保存失败，请检查设备存储空间');
+      toast(uiText('保存失败，请检查设备存储空间'));
     }
     return success;
   }

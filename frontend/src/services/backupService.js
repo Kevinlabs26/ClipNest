@@ -1,6 +1,7 @@
 // Local library backup export/import and version history snapshots
 import { openImageDatabase, getImage, storeImage, normalize } from './storageService.js';
 import { store } from '../state/store.js';
+import { uiText } from '../utils/dom.js';
 
 // Convert blob to DataURL
 export async function blobAsDataUrl(blob) {
@@ -19,7 +20,7 @@ export async function exportBackupFile() {
 
   for (const id of ids) {
     const blob = await getImage(id);
-    if (!blob) throw new Error(`图片数据缺失，无法完整导出备份（${id}）`);
+    if (!blob) throw new Error(uiText('图片数据缺失，无法完整导出备份（{id}）').replace('{id}', id));
     images.push({ id, data: await blobAsDataUrl(blob) });
   }
 

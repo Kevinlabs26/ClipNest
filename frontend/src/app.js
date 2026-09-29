@@ -1,4 +1,4 @@
-import { $, $$, toast, setUiLanguage } from './utils/dom.js';
+import { $, $$, toast, setUiLanguage, uiText, displayLanguageName, errorMessage } from './utils/dom.js';
 import { extractVariables, renderTemplate, richTextValue } from './utils/text.js';
 import { nativeInvoke, writeTextToClipboard, writeImageToClipboard } from './utils/clipboard.js';
 import { store, state, persist, markEdited } from './state/store.js';
@@ -42,7 +42,7 @@ export function renderAppView() {
 
   renderStepper();
   const visibleItems = store.getVisibleItems();
-  const currentTitle = store.view === 'category' ? store.category : store.view === 'favorites' ? '常用收藏' : store.view === 'recent' ? '最近复制' : '全部素材';
+  const currentTitle = store.view === 'category' ? store.category : uiText(store.view === 'favorites' ? '常用收藏' : store.view === 'recent' ? '最近复制' : '全部素材');
   const titleEl = $('#current-title');
   if (titleEl) titleEl.textContent = currentTitle;
   const pageTitleEl = $('#page-title');
@@ -54,9 +54,11 @@ export function renderAppView() {
     categoryTitleIcon.textContent = state.categoryIcons[store.category] || '▱';
   }
   const resultsEl = $('#results');
-  if (resultsEl) resultsEl.textContent = `${visibleItems.length} 条素材`;
+  if (resultsEl) resultsEl.textContent = `${visibleItems.length} ${uiText('条素材')}`;
 
   const missingCountEl = $('#missing-language-count');
+  const missingNameEl = $('#missing-language-name');
+  if (missingNameEl) missingNameEl.textContent = displayLanguageName(state.languages[1]);
   if (missingCountEl) {
     missingCountEl.textContent = state.items.filter(i => (i.type || 'script') === 'script' && !i.hasSecondLanguage).length;
   }
@@ -74,13 +76,13 @@ export function renderAppView() {
 
   $$('[data-language]').forEach(btn => {
     btn.classList.toggle('selected', btn.dataset.language === store.language);
-    if (btn.dataset.language === '0') btn.textContent = state.languages[0];
-    else if (btn.dataset.language === '1') btn.textContent = state.languages[1];
+    if (btn.dataset.language === '0') btn.textContent = displayLanguageName(state.languages[0]);
+    else if (btn.dataset.language === '1') btn.textContent = displayLanguageName(state.languages[1]);
   });
 
   const draftTranslateBtn = $('#translate-add-language');
   if (draftTranslateBtn) {
-    draftTranslateBtn.textContent = `AI 翻译为${state.languages[1]}`;
+    draftTranslateBtn.textContent = `${uiText('AI 翻译为')} ${displayLanguageName(state.languages[1])}`;
     draftTranslateBtn.hidden = !isAiConfigured || $('#item-type-input')?.value !== 'script' || !$('#second-language-field')?.hidden;
   }
 
@@ -88,7 +90,7 @@ export function renderAppView() {
   const translatable = visibleItems.filter(item => (item.type || 'script') === 'script' && !item.hasSecondLanguage && item.translations[0]?.trim());
   if (translateBtn) {
     translateBtn.hidden = !isAiConfigured || !translatable.length;
-    translateBtn.textContent = `批量翻译 ${translatable.length} 条`;
+    translateBtn.textContent = `${uiText('批量翻译')} ${translatable.length} ${uiText('条')}`;
   }
 }
 
@@ -120,10 +122,10 @@ async function handleCopyItemAction(item, translationIndex) {
   item.copied = (item.copied || 0) + 1;
   item.recent = Date.now();
   persist();
-  toast(`✓ 已复制${state.languages[translationIndex]}`);
+  toast(`${uiText('✓ 已复制')} ${displayLanguageName(state.languages[translationIndex])}`);
   const currentCard = [...document.querySelectorAll('.content-card')].find(card => card.dataset.id === item.id);
   const copyCount = currentCard?.querySelector('[data-copy-count]');
-  if (copyCount) copyCount.textContent = ` · 已复制 ${item.copied} 次`;
+  if (copyCount) copyCount.textContent = ` · ${uiText('已复制')} ${item.copied} ${uiText('次')}`;
 
   if ((store.view === 'recent' && store.sortMode === 'manual') || store.sortMode === 'popular') {
     const cards = $('#cards');
@@ -142,7 +144,7 @@ async function handleCopyItemAction(item, translationIndex) {
       setTimeout(() => {
         store.category = steps[curIdx + 1];
         persist(); renderAppView();
-        toast(`✓ 已自动推进至第 ${curIdx + 2} 步`);
+        toast(`${uiText('✓ 已自动推进至步骤')} ${curIdx + 2}`);
       }, 350);
     }
   }
@@ -151,20 +153,20 @@ async function handleCopyItemAction(item, translationIndex) {
 async function translateItem(item, targetIndex) {
   const sourceIndex = 1 - targetIndex;
   const source = item.translations[sourceIndex]?.trim();
-  if (!source) return toast('请先填写要翻译的语言');
+  if (!source) return toast(uiText('请先填写要翻译的语言'));
   try {
     const translated = await requestSingleTranslation(source, state.languages[sourceIndex], state.languages[targetIndex]);
     item.translations[targetIndex] = translated;
     item.hasSecondLanguage = true;
     markEdited(item); persist(); renderAppView();
-    toast(`✓ 已翻译为${state.languages[targetIndex]}`);
-  } catch (err) { toast(err?.message || '翻译失败，请检查 AI 设置'); }
+    toast(`${uiText('✓ 已翻译为')} ${displayLanguageName(state.languages[targetIndex])}`);
+  } catch (err) { toast(errorMessage(err, '翻译失败，请检查 AI 设置')); }
 }
 
 async function translateDraft(targetIndex) {
   const sourceIndex = 1 - targetIndex;
   const source = richTextValue($(`#language-input-${sourceIndex}`)).trim();
-  if (!source) return toast('请先填写要翻译的语言');
+  if (!source) return toast(uiText('请先填写要翻译的语言'));
   try {
     const translated = await requestSingleTranslation(source, state.languages[sourceIndex], state.languages[targetIndex]);
     $(`#language-input-${targetIndex}`).textContent = translated;
@@ -176,7 +178,7 @@ async function translateDraft(targetIndex) {
       $('#content-form').classList.add('has-second-language');
     }
     $('#content-form').dispatchEvent(new Event('input', { bubbles: true }));
-  } catch (err) { toast(err?.message || '翻译失败，请检查 AI 设置'); }
+  } catch (err) { toast(errorMessage(err, '翻译失败，请检查 AI 设置')); }
 }
 
 async function startCategoryFlow() {
@@ -200,8 +202,8 @@ function renderTranslationBatch(batch = translationBatch) {
     return;
   }
   status.hidden = false;
-  $('#translation-batch-title').textContent = batch.status === 'done' ? '批量翻译完成' : batch.status === 'paused' ? '批量翻译已暂停' : '正在批量翻译';
-  $('#translation-batch-detail').textContent = `${batch.translated} 条已完成 · ${batch.failed.length} 条失败${batch.currentTitle ? ` · ${batch.currentTitle}` : ''}`;
+  $('#translation-batch-title').textContent = uiText(batch.status === 'done' ? '批量翻译完成' : batch.status === 'paused' ? '批量翻译已暂停' : '正在批量翻译');
+  $('#translation-batch-detail').textContent = `${batch.translated} ${uiText('条已完成')} · ${batch.failed.length} ${uiText('条失败')}${batch.currentTitle ? ` · ${batch.currentTitle}` : ''}`;
   $('#translation-batch-progress').value = batch.ids.length ? batch.cursor / batch.ids.length : 1;
   $('#retry-translation-failures').hidden = !batch.failed.length;
   $('#continue-translation-batch').hidden = batch.status !== 'paused' || batch.cursor >= batch.ids.length;
@@ -238,7 +240,7 @@ function handleGlobalClick(event) {
     const isDark = document.body.dataset.colorScheme === 'dark';
     state.preferences.colorScheme = isDark ? 'light' : 'dark';
     persist(); updateColorScheme(state.preferences.colorScheme);
-    toast(state.preferences.colorScheme === 'dark' ? '已开启深色模式' : '已切换浅色模式');
+    toast(uiText(state.preferences.colorScheme === 'dark' ? '已开启深色模式' : '已切换浅色模式'));
     return;
   }
   if (event.target.closest('#settings-button')) { openSettings('general'); return; }
@@ -318,7 +320,7 @@ function handleGlobalClick(event) {
     const name = categoryMenuBtn.dataset.categoryName;
     categoryMenuBtn.closest('.category-more-wrap')?.removeAttribute('open');
     if (categoryMenuBtn.dataset.categoryMenu === 'rename') {
-      askInput('重命名分类', name, '分类名称').then(requested => {
+      askInput(uiText('重命名分类'), name, uiText('分类名称')).then(requested => {
         if (requested !== null) renameCategory(name, requested);
       });
     } else if (categoryMenuBtn.dataset.categoryMenu === 'move') openCategoryMove(name);
@@ -404,7 +406,7 @@ function handleGlobalClick(event) {
     const ids = store.getVisibleItems().filter(item => (item.type || 'script') === 'script' && !item.hasSecondLanguage && item.translations[0]?.trim()).map(item => item.id);
     if (ids.length) {
       const dialog = $('#batch-translate-dialog');
-      $('#batch-translate-note').textContent = `将为 ${ids.length} 条素材发送文本进行 AI 翻译，可能产生服务费用。`;
+      $('#batch-translate-note').textContent = uiText('将为 {count} 条素材发送文本进行 AI 翻译，可能产生服务费用。').replace('{count}', ids.length);
       dialog.dataset.itemIds = JSON.stringify(ids);
       dialog.showModal();
     }
@@ -421,13 +423,13 @@ function handleGlobalClick(event) {
     translationBatchDismissed = true; $('#translation-batch-status').hidden = true; return;
   }
   if (event.target.closest('#bulk-add-tags')) {
-    askInput('批量添加标签', '', '用逗号分隔多个标签').then(value => {
+    askInput(uiText('批量添加标签'), '', uiText('用逗号分隔多个标签')).then(value => {
       const tags = (value || '').split(',').map(tag => tag.trim()).filter(Boolean);
       if (!tags.length) return;
       state.items.filter(entry => store.selectedItemIds.has(entry.id)).forEach(entry => {
         entry.tags = [...new Set([...entry.tags, ...tags])]; markEdited(entry);
       });
-      persist(); renderAppView(); toast('✓ 已为所选素材添加标签');
+      persist(); renderAppView(); toast(uiText('✓ 已为所选素材添加标签'));
     });
     return;
   }
@@ -437,14 +439,14 @@ function handleGlobalClick(event) {
     const menu = $('#image-context-menu');
     menu.hidePopover();
     if (imageMenuAction.dataset.imageMenuAction === 'preview') openImagePreview(id, itemId);
-    else if (imageMenuAction.dataset.imageMenuAction === 'copy') getImage(id).then(writeImageToClipboard).then(() => toast('✓ 已复制图片')).catch(err => toast(err.message || '复制图片失败'));
+    else if (imageMenuAction.dataset.imageMenuAction === 'copy') getImage(id).then(writeImageToClipboard).then(() => toast(uiText('✓ 已复制图片'))).catch(err => toast(errorMessage(err, '复制图片失败')));
     else if (imageMenuAction.dataset.imageMenuAction === 'download') getImage(id).then(blob => {
-      if (!blob) throw new Error('无法读取图片');
+      if (!blob) throw new Error(uiText('无法读取图片'));
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url; link.download = `clipnest-image.${blob.type.split('/')[1] || 'png'}`; link.click();
       setTimeout(() => URL.revokeObjectURL(url), 2000);
-    }).catch(err => toast(err.message || '下载图片失败'));
+    }).catch(err => toast(errorMessage(err, '下载图片失败')));
     else if (imageMenuAction.dataset.imageMenuAction === 'remove') {
       const item = state.items.find(entry => entry.id === itemId);
       if (item) {
@@ -603,11 +605,11 @@ function setupItemCategoryDropListeners() {
       markEdited(item);
       persist();
       renderAppView();
-      toast(`✓ 已移动到“${category}”`);
+      toast(uiText('✓ 已移动到“{name}”').replace('{name}', category));
       return;
     }
     if (targetCard && targetCard.dataset.id !== drag.id) {
-      if (store.sortMode !== 'manual' || store.view === 'recent') return toast('切换到手动排序后才能拖动排序');
+      if (store.sortMode !== 'manual' || store.view === 'recent') return toast(uiText('切换到手动排序后才能拖动排序'));
       const movedIndex = state.items.findIndex(entry => entry.id === drag.id);
       if (movedIndex < 0) return;
       const [movedItem] = state.items.splice(movedIndex, 1);
@@ -617,7 +619,7 @@ function setupItemCategoryDropListeners() {
       state.items.splice(targetIndex + (after ? 1 : 0), 0, movedItem);
       persist();
       renderAppView();
-      toast('✓ 已调整素材顺序');
+      toast(uiText('✓ 已调整素材顺序'));
     }
   });
   document.addEventListener('pointercancel', event => {
@@ -741,7 +743,7 @@ export async function initApp() {
   renderAppView();
   nativeInvoke('check_for_update')
     .then(version => {
-      if (version) toast(`发现新版本 ${version}`, '查看更新', () => nativeInvoke('open_latest_release'), 15000);
+      if (version) toast(`${uiText('发现新版本')} ${version}`, uiText('查看更新'), () => nativeInvoke('open_latest_release'), 15000);
     })
     .catch(() => {});
 }

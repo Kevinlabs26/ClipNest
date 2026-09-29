@@ -38,9 +38,9 @@ export function renderStepper() {
   // Title and current step progress indicator
   $('#category-flow-scenario').textContent = categoryPath(store.scenarioFlow.parent, categories, categoryParents);
   const locale = preferences.uiLanguage;
-  $('#category-flow-step').textContent = locale === 'en'
-    ? `(${currentIndex + 1} of ${activeSteps.length})`
-    : `(第 ${currentIndex + 1}/${activeSteps.length} 步)`;
+  $('#category-flow-step').textContent = locale === 'zh-CN'
+    ? `(第 ${currentIndex + 1}/${activeSteps.length} 步)`
+    : `${uiText('步骤')} ${currentIndex + 1} ${uiText('共')} ${activeSteps.length}`;
 
   const prevBtn = $('#category-flow-prev');
   const nextBtn = $('#category-flow-next');
@@ -62,7 +62,7 @@ export function renderStepper() {
       const stateClass = isCurrent ? 'current' : isPast ? 'completed' : 'upcoming';
       const badgeIcon = isPast ? '✓' : String(stepIndex + 1);
 
-      return `<button class="stepper-item ${stateClass}" type="button" data-flow-step-index="${stepIndex}" title="切换至第 ${stepIndex + 1} 步：${esc(stepName)}">` +
+      return `<button class="stepper-item ${stateClass}" type="button" data-flow-step-index="${stepIndex}" title="${uiText('步骤')} ${stepIndex + 1}: ${esc(stepName)}">` +
         `<span class="stepper-badge">${badgeIcon}</span>` +
         `<span class="stepper-name">${esc(stepName)}</span>` +
         `</button>`;

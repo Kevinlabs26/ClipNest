@@ -42,11 +42,11 @@ export function askInput(title, initialValue = '', inputHint = '', options = {})
 
 export async function createCategory(parentCategoryName = '') {
   pendingNewCategoryIcon = '';
-  const newCatName = (await askInput(parentCategoryName ? `在“${categoryPath(parentCategoryName)}”下新建子分类` : '新分类名称', '', '', { categoryIcon: true }))?.trim();
+  const newCatName = (await askInput(parentCategoryName ? uiText('在“{name}”下新建子分类').replace('{name}', categoryPath(parentCategoryName)) : uiText('新分类名称'), '', '', { categoryIcon: true }))?.trim();
   const pickedIcon = pendingNewCategoryIcon;
   pendingNewCategoryIcon = '';
   if (!newCatName) return;
-  if (state.categories.includes(newCatName)) return toast('这个分类已存在');
+  if (state.categories.includes(newCatName)) return toast(uiText('这个分类已存在'));
   state.categories.push(newCatName);
   if (pickedIcon) state.categoryIcons[newCatName] = pickedIcon;
   if (parentCategoryName) state.categoryParents[newCatName] = parentCategoryName;
@@ -63,7 +63,7 @@ export function renameCategory(oldCategoryName, requestedNewName) {
   if (!finalName) return false;
   if (finalName === oldCategoryName) return true;
   if (state.categories.includes(finalName)) {
-    toast('这个分类已存在');
+    toast(uiText('这个分类已存在'));
     return false;
   }
   state.categories = state.categories.map(entry => entry === oldCategoryName ? finalName : entry);
@@ -89,7 +89,7 @@ export function renderIconPicker() {
   const iconList = (activeIconPickerTab === 'emoji' ? EMOJI_ICONS : SYMBOL_ICONS).filter(icon => !searchQuery || icon.includes(searchQuery));
   const gridEl = $('#icon-picker-grid');
   if (gridEl) {
-    gridEl.innerHTML = `${searchQuery ? `<button class="icon-picker-custom" data-icon-value="${esc(searchQuery)}">使用“${esc(searchQuery)}”</button>` : ''}${iconList.map(icon => `<button type="button" data-icon-value="${esc(icon)}" aria-label="${esc(icon)}">${esc(icon)}</button>`).join('') || '<span class="empty-icons">没有匹配的图标</span>'}`;
+    gridEl.innerHTML = `${searchQuery ? `<button class="icon-picker-custom" data-icon-value="${esc(searchQuery)}">${esc(uiText('使用'))} “${esc(searchQuery)}”</button>` : ''}${iconList.map(icon => `<button type="button" data-icon-value="${esc(icon)}" aria-label="${esc(icon)}">${esc(icon)}</button>`).join('') || `<span class="empty-icons">${esc(uiText('没有匹配的图标'))}</span>`}`;
   }
   $$('[data-icon-tab]').forEach(btn => btn.classList.toggle('selected', btn.dataset.iconTab === activeIconPickerTab));
 }
@@ -144,15 +144,15 @@ export function applyPickedIcon(iconValue) {
 export function openCategoryMove(catName) {
   activeMovingCategoryName = catName;
   const candidates = state.categories.filter(c => c !== catName && !isAncestorCategory(catName, c));
-  $('#category-parent-select').innerHTML = `<option value="">顶层分类</option>${candidates.map(c => `<option value="${esc(c)}">${esc(categoryPath(c))}</option>`).join('')}`;
+  $('#category-parent-select').innerHTML = `<option value="">${esc(uiText('顶层分类'))}</option>${candidates.map(c => `<option value="${esc(c)}">${esc(categoryPath(c))}</option>`).join('')}`;
   $('#category-parent-select').value = state.categoryParents[catName] || '';
   $('#category-move-dialog').showModal();
 }
 
 export function openCategoryDelete(catName) {
   const destinations = state.categories.filter(c => c !== catName && !isAncestorCategory(catName, c));
-  if (!destinations.length) return toast('请先在此分类之外创建一个分类');
-  $('#category-delete-name').textContent = `删除“${categoryPath(catName)}”后，它的素材和子分类会合并到所选分类。`;
+  if (!destinations.length) return toast(uiText('请先在此分类之外创建一个分类'));
+  $('#category-delete-name').textContent = uiText('删除“{name}”后，它的素材和子分类会合并到所选分类。').replace('{name}', categoryPath(catName));
   $('#category-delete-target').innerHTML = destinations.map(c => `<option value="${esc(c)}">${esc(categoryPath(c))}</option>`).join('');
   $('#category-delete-target').value = destinations.includes(state.categoryParents[catName]) ? state.categoryParents[catName] : destinations[0];
   $('#category-delete-dialog').dataset.category = catName;
@@ -208,7 +208,7 @@ export async function openImagePreview(imageId, itemId = '') {
   const previewModal = $('#image-preview');
   if (!previewModal || previewModal.open) return;
   const imageBlob = await getImage(imageId);
-  if (!imageBlob) return toast('无法读取图片');
+  if (!imageBlob) return toast(uiText('无法读取图片'));
   const previewImg = $('#image-preview-content');
   previewImg.src = URL.createObjectURL(imageBlob);
   previewImg.dataset.imageId = imageId;
@@ -226,7 +226,7 @@ export function setupDialogEventListeners() {
     else delete state.categoryParents[activeMovingCategoryName];
     persist(); renderAll();
     $('#category-move-dialog')?.close();
-    toast('✓ 分类位置已更新');
+    toast(uiText('✓ 分类位置已更新'));
   });
 
   $('#category-remove-form')?.addEventListener('submit', event => {
@@ -246,7 +246,7 @@ export function setupDialogEventListeners() {
     if (state.category === targetCat) state.category = '';
     persist(); renderAll();
     $('#category-remove-dialog')?.close();
-    toast('✓ 分类已删除，素材已保留');
+    toast(uiText('✓ 分类已删除，素材已保留'));
   });
 
   $('#category-delete-form')?.addEventListener('submit', event => {
@@ -263,7 +263,7 @@ export function setupDialogEventListeners() {
     if (state.category === targetCat) state.category = destCat;
     persist(); renderAll();
     $('#category-delete-dialog')?.close();
-    toast('✓ 已合并并删除分类');
+    toast(uiText('✓ 已合并并删除分类'));
   });
 
   $('#remove-language-form')?.addEventListener('submit', event => {
@@ -275,7 +275,7 @@ export function setupDialogEventListeners() {
     item.hasSecondLanguage = false;
     markEdited(item); persist(); renderAll();
     $('#remove-language-dialog').close();
-    toast('✓ 已移除第二种语言');
+    toast(uiText('✓ 已移除第二种语言'));
   });
 
   $('#image-preview')?.addEventListener('click', event => {

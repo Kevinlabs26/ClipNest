@@ -1,5 +1,5 @@
 // Bulk import editor component for multi-item raw text parsing
-import { $, toast } from '../utils/dom.js';
+import { $, toast, uiText, displayLanguageName } from '../utils/dom.js';
 import { esc } from '../utils/text.js';
 import { state, persist, renderAll } from '../state/store.js';
 
@@ -29,16 +29,16 @@ export function renderBulkPreview() {
   const previewListEl = $('#bulk-preview-list');
   const importBtn = $('#bulk-import');
 
-  if (countEl) countEl.textContent = parsedItems.length ? `识别到 ${parsedItems.length} 条素材` : '粘贴内容后显示识别结果';
+  if (countEl) countEl.textContent = parsedItems.length ? `${uiText('识别到')} ${parsedItems.length} ${uiText('条素材')}` : uiText('粘贴内容后显示识别结果');
   if (previewListEl) {
-    previewListEl.innerHTML = parsedItems.slice(0, 6).map(item => `<span class="bulk-preview-item">${esc(item.title)}${item.hasSecondLanguage ? ` · ${esc(state.languages[1])}` : ''}</span>`).join('') + (parsedItems.length > 6 ? `<span class="bulk-preview-item">还有 ${parsedItems.length - 6} 条…</span>` : '');
+    previewListEl.innerHTML = parsedItems.slice(0, 6).map(item => `<span class="bulk-preview-item">${esc(item.title)}${item.hasSecondLanguage ? ` · ${esc(displayLanguageName(state.languages[1]))}` : ''}</span>`).join('') + (parsedItems.length > 6 ? `<span class="bulk-preview-item">${uiText('还有')} ${parsedItems.length - 6} ${uiText('条')}…</span>` : '');
   }
   if (importBtn) importBtn.disabled = !parsedItems.length;
 }
 
 // Open bulk editor modal
 export function openBulkEditor() {
-  if (!state.categories.length) return toast('请先创建分类');
+  if (!state.categories.length) return toast(uiText('请先创建分类'));
   const selectedCat = state.view === 'category' ? state.category : state.lastCategory;
   const bulkCategorySelect = $('#bulk-category');
   const bulkModal = $('#bulk-editor');
@@ -90,7 +90,7 @@ export function importBulk() {
   if ($('#bulk-input')) $('#bulk-input').value = '';
   closeBulkEditor();
   renderAll();
-  toast(`✓ 已导入 ${newItems.length} 条素材`);
+  toast(`${uiText('✓ 已导入')} ${newItems.length} ${uiText('条素材')}`);
 }
 
 // Bind bulk editor events

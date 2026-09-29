@@ -1,5 +1,5 @@
 // Cards Component: item cards, dual-language copy pills, variable badges, and image hydration
-import { $, toast } from '../utils/dom.js';
+import { $, toast, uiText, displayLanguageName } from '../utils/dom.js';
 import { esc, highlight, categoryPath, richTextValue } from '../utils/text.js';
 import { getImage } from '../services/storageService.js';
 import { store, markEdited } from '../state/store.js';
@@ -60,7 +60,7 @@ export function setupTextFormattingToolbar() {
       const field = document.querySelector(`.content-card[data-id="${CSS.escape(last.itemId)}"] [data-inline-edit="${last.index}"]`);
       if (field) field.innerHTML = highlight(last.before, store.searchQuery.trim().toLowerCase());
       hide();
-      toast('✓ 已撤销上一次文字格式');
+      toast(uiText('✓ 已撤销上一次文字格式'));
       return true;
     }
     updateUndo();
@@ -105,7 +105,7 @@ export function setupTextFormattingToolbar() {
     store.persist();
     updateUndo();
     positionToolbar(selectedRange);
-    toast(kind === 'bold' ? '✓ 已加粗选中文字' : kind === 'bg' ? '✓ 已更改文字底色' : '✓ 已更改文字颜色');
+    toast(uiText(kind === 'bold' ? '✓ 已加粗选中文字' : kind === 'bg' ? '✓ 已更改文字底色' : '✓ 已更改文字颜色'));
   };
 
   document.addEventListener('selectionchange', () => {
@@ -264,7 +264,7 @@ function setupCardImageReordering(container) {
         .sort((a, b) => item.images.indexOf(a.dataset.imageId) - item.images.indexOf(b.dataset.imageId))
         .forEach(tile => list.append(tile));
       store.persist();
-      toast('✓ 已调整图片位置');
+      toast(uiText('✓ 已调整图片位置'));
     }
   });
 
@@ -318,7 +318,9 @@ export function renderCards(items, aiKeyConfigured = false) {
   setupCardImageReordering(cardsContainer);
 
   const { language, searchQuery, selectedItemIds, selectionModeActive, state } = store;
-  const { languages, expanded, categories, categoryParents } = state;
+  const { expanded, categories, categoryParents } = state;
+  const languages = state.languages.map(displayLanguageName);
+  const t = key => esc(uiText(key));
   const term = searchQuery.trim().toLowerCase();
 
   cardsContainer.className = `cards language-${language}`;
@@ -345,18 +347,18 @@ export function renderCards(items, aiKeyConfigured = false) {
     if (!isScript) {
       copyButtonsHtml = '';
     } else if (language === '0') {
-      copyButtonsHtml = `<button class="card-copy-pill" data-action="copy-0" title="复制 ${esc(languages[0])}">复制 ${esc(languages[0])}</button>`;
+      copyButtonsHtml = `<button class="card-copy-pill" data-action="copy-0" title="${t('复制')} ${esc(languages[0])}">${t('复制')} ${esc(languages[0])}</button>`;
     } else if (language === '1') {
       const targetIdx = item.hasSecondLanguage ? 1 : 0;
-      copyButtonsHtml = `<button class="card-copy-pill" data-action="copy-${targetIdx}" title="复制 ${esc(languages[targetIdx])}">复制 ${esc(languages[targetIdx])}</button>`;
+      copyButtonsHtml = `<button class="card-copy-pill" data-action="copy-${targetIdx}" title="${t('复制')} ${esc(languages[targetIdx])}">${t('复制')} ${esc(languages[targetIdx])}</button>`;
     } else {
       if (item.hasSecondLanguage) {
         copyButtonsHtml = `<div class="card-copy-group">` +
-          `<button class="card-copy-pill" data-action="copy-0" title="复制 ${esc(languages[0])}">${esc(languages[0])}</button>` +
-          `<button class="card-copy-pill" data-action="copy-1" title="复制 ${esc(languages[1])}">${esc(languages[1])}</button>` +
+          `<button class="card-copy-pill" data-action="copy-0" title="${t('复制')} ${esc(languages[0])}">${esc(languages[0])}</button>` +
+          `<button class="card-copy-pill" data-action="copy-1" title="${t('复制')} ${esc(languages[1])}">${esc(languages[1])}</button>` +
           `</div>`;
       } else {
-        copyButtonsHtml = `<button class="card-copy-pill" data-action="copy-0" title="复制 ${esc(languages[0])}">复制 ${esc(languages[0])}</button>`;
+        copyButtonsHtml = `<button class="card-copy-pill" data-action="copy-0" title="${t('复制')} ${esc(languages[0])}">${t('复制')} ${esc(languages[0])}</button>`;
       }
     }
 
@@ -364,31 +366,31 @@ export function renderCards(items, aiKeyConfigured = false) {
     const fullCategoryPath = categoryPath(item.category, categories, categoryParents);
 
     return `<article class="content-card ${isCollapsed} ${isSelected ? 'is-selected' : ''} ${item.hasSecondLanguage ? '' : 'single-language'}" data-id="${esc(item.id)}" tabindex="-1">` +
-      `<button class="drag-handle" type="button" title="拖到素材卡片间调整顺序，拖到左侧分类以移动素材" aria-label="拖动素材以排序或移动分类">⠿</button>` +
+      `<button class="drag-handle" type="button" title="${t('拖到素材卡片间调整顺序，拖到左侧分类以移动素材')}" aria-label="${t('拖动素材以排序或移动分类')}">⠿</button>` +
       `<div class="card-head">` +
-      (selectionModeActive ? `<button class="select-item ${isSelected ? 'selected' : ''}" data-select-item="${esc(item.id)}" type="button" aria-label="${isSelected ? '取消选择' : '选择素材'}" aria-pressed="${isSelected}">${isSelected ? '✓' : ''}</button>` : '') +
-      `<button class="card-icon" data-action="icon" title="自定义图标" aria-label="自定义素材图标">${esc(item.icon || '▤')}</button>` +
-      `<div><h2 class="card-title" data-inline-title title="双击直接编辑">${highlight(item.title, term)}</h2>` +
-      `<div class="card-meta">${esc(fullCategoryPath)} · ${isScript ? `${esc(languages[0])}${item.hasSecondLanguage ? ` / ${esc(languages[1])}` : ''}` : isDocument ? '文档' : `待办清单 · ${(item.tasks || []).filter(task => task.done).length}/${(item.tasks || []).length} 已完成`}<span data-copy-count>${isScript && item.copied ? ` · 已复制 ${item.copied} 次` : ''}</span>${isScript && varNames.length ? `<span class="card-meta-var-badge" title="包含 ${varNames.length} 个变量：${esc(varNames.join(', '))}">⚡ ${varNames.length} 变量</span>` : ''}</div>` +
+      (selectionModeActive ? `<button class="select-item ${isSelected ? 'selected' : ''}" data-select-item="${esc(item.id)}" type="button" aria-label="${t(isSelected ? '取消选择' : '选择素材')}" aria-pressed="${isSelected}">${isSelected ? '✓' : ''}</button>` : '') +
+      `<button class="card-icon" data-action="icon" title="${t('自定义图标')}" aria-label="${t('自定义素材图标')}">${esc(item.icon || '▤')}</button>` +
+      `<div><h2 class="card-title" data-inline-title title="${t('双击直接编辑')}">${highlight(item.title, term)}</h2>` +
+      `<div class="card-meta">${item.category ? esc(fullCategoryPath) : t('未分类')} · ${isScript ? `${esc(languages[0])}${item.hasSecondLanguage ? ` / ${esc(languages[1])}` : ''}` : isDocument ? t('文档') : `${t('待办清单')} · ${(item.tasks || []).filter(task => task.done).length}/${(item.tasks || []).length} ${t('已完成')}`}<span data-copy-count>${isScript && item.copied ? ` · ${t('已复制')} ${item.copied} ${t('次')}` : ''}</span>${isScript && varNames.length ? `<span class="card-meta-var-badge" title="${t('包含')} ${varNames.length} ${t('个变量')}：${esc(varNames.join(', '))}">⚡ ${varNames.length} ${t('变量')}</span>` : ''}</div>` +
       `</div>` +
       `<div class="card-actions">` +
-      `<button class="icon-button ${item.favorite ? 'favorite' : ''}" data-action="favorite" title="收藏" aria-label="收藏">${item.favorite ? '★' : '☆'}</button>` +
+      `<button class="icon-button ${item.favorite ? 'favorite' : ''}" data-action="favorite" title="${t('收藏')}" aria-label="${t('收藏')}">${item.favorite ? '★' : '☆'}</button>` +
       copyButtonsHtml +
-      `<details class="card-more-wrap"><summary class="icon-button card-more" aria-label="更多操作" title="更多操作">···</summary>` +
+      `<details class="card-more-wrap"><summary class="icon-button card-more" aria-label="${t('更多操作')}" title="${t('更多操作')}">···</summary>` +
       `<div class="card-more-menu">` +
-      `<button type="button" data-action="edit-full">编辑${isScript ? '分类、标签和图片' : '内容、分类、标签和图片'}…</button>` +
-      `<button type="button" data-action="insert-after">在此后新建</button>` +
-      `<button type="button" data-action="clone">克隆</button>` +
-      (isScript && !item.hasSecondLanguage ? `<button type="button" data-action="add-language">手动添加${esc(languages[1])}</button>` : '') +
-      (isScript && translationTarget >= 0 ? `<button type="button" data-translation-target="${translationTarget}" data-action="${aiKeyConfigured ? `translate-${translationTarget}` : 'configure-ai'}">${aiKeyConfigured ? `AI 翻译为${esc(languages[translationTarget])}` : '设置 AI 翻译'}</button>` : '') +
-      `<button type="button" data-action="add-image">添加图片</button>` +
-      `<button type="button" class="danger-action" data-action="delete-item">删除</button>` +
+      `<button type="button" data-action="edit-full">${t(isScript ? '编辑分类、标签和图片…' : '编辑内容、分类、标签和图片…')}</button>` +
+      `<button type="button" data-action="insert-after">${t('在此后新建')}</button>` +
+      `<button type="button" data-action="clone">${t('克隆')}</button>` +
+      (isScript && !item.hasSecondLanguage ? `<button type="button" data-action="add-language">${t('手动添加')} ${esc(languages[1])}</button>` : '') +
+      (isScript && translationTarget >= 0 ? `<button type="button" data-translation-target="${translationTarget}" data-action="${aiKeyConfigured ? `translate-${translationTarget}` : 'configure-ai'}">${aiKeyConfigured ? `${t('AI 翻译为')} ${esc(languages[translationTarget])}` : t('设置 AI 翻译')}</button>` : '') +
+      `<button type="button" data-action="add-image">${t('添加图片')}</button>` +
+      `<button type="button" class="danger-action" data-action="delete-item">${t('删除')}</button>` +
       `</div></details>` +
-      `<button class="card-toggle" data-action="toggle" aria-label="${isCollapsed ? '展开' : '收起'}" aria-expanded="${!isCollapsed}" title="${isCollapsed ? '展开' : '收起'}"></button>` +
+      `<button class="card-toggle" data-action="toggle" aria-label="${t(isCollapsed ? '展开' : '收起')}" aria-expanded="${!isCollapsed}" title="${t(isCollapsed ? '展开' : '收起')}"></button>` +
       `</div></div>` +
-      (isScript ? `<div class="card-body">${[0, 1].filter(idx => idx === 0 || item.hasSecondLanguage).map(idx => `<section class="language-block" data-lang="${idx}"><div class="language-head"><span>${esc(languages[idx])}</span><div class="language-tools"><button class="copy-button" data-action="copy-${idx}" title="复制${esc(languages[idx])}">复制</button>${idx === 1 ? '<button class="remove-language" data-action="remove-language" title="移除语言 2" aria-label="移除语言 2">×</button>' : ''}</div></div><p class="language-text" data-inline-edit="${idx}" aria-label="${esc(languages[idx])} 内容" title="双击直接编辑">${highlight(item.translations[idx], term)}</p></section>`).join('')}</div>` : isDocument ? `<div class="card-body document-body"><section class="language-block document-block"><div class="language-head"><span>正文</span></div><p class="language-text" data-inline-edit="0" aria-label="文档正文" title="双击直接编辑">${highlight(item.translations[0] || '', term)}</p></section></div>` : `<div class="card-body checklist-body">${(item.tasks || []).map((task, index) => `<label class="task-row"><input type="checkbox" data-task-toggle="${index}" aria-label="完成 ${esc(task.text)}" ${task.done ? 'checked' : ''}><span class="${task.done ? 'task-done' : ''}">${highlight(task.text, term)}</span></label>`).join('') || '<p class="task-empty">从“更多操作 → 编辑内容”添加待办项目</p>'}</div>` ) +
-      (item.images?.length ? `<div class="card-images">${item.images.map(id => `<div class="card-image-wrap" data-image-id="${esc(id)}" title="点击预览；长按拖动可调整顺序"><img class="card-image" data-image-id="${esc(id)}" data-action="preview-image" alt="素材图片"><button class="remove-card-image" type="button" data-action="remove-image" data-image-id="${esc(id)}" aria-label="删除这张图片" title="删除图片">×</button></div>`).join('')}</div>` : '') +
-      (item.tags?.length ? `<footer class="card-foot">${item.tags.map(tag => `<button class="tag" type="button" data-tag-filter="${esc(tag)}" aria-label="筛选标签 ${esc(tag)}">#${esc(tag)}</button>`).join('')}</footer>` : '') +
+      (isScript ? `<div class="card-body">${[0, 1].filter(idx => idx === 0 || item.hasSecondLanguage).map(idx => `<section class="language-block" data-lang="${idx}"><div class="language-head"><span>${esc(languages[idx])}</span><div class="language-tools"><button class="copy-button" data-action="copy-${idx}" title="${t('复制')} ${esc(languages[idx])}">${t('复制')}</button>${idx === 1 ? `<button class="remove-language" data-action="remove-language" title="${t('移除语言 2')}" aria-label="${t('移除语言 2')}">×</button>` : ''}</div></div><p class="language-text" data-inline-edit="${idx}" aria-label="${esc(languages[idx])} ${t('内容')}" title="${t('双击直接编辑')}">${highlight(item.translations[idx], term)}</p></section>`).join('')}</div>` : isDocument ? `<div class="card-body document-body"><section class="language-block document-block"><div class="language-head"><span>${t('正文')}</span></div><p class="language-text" data-inline-edit="0" aria-label="${t('文档正文')}" title="${t('双击直接编辑')}">${highlight(item.translations[0] || '', term)}</p></section></div>` : `<div class="card-body checklist-body">${(item.tasks || []).map((task, index) => `<label class="task-row"><input type="checkbox" data-task-toggle="${index}" aria-label="${t('完成')} ${esc(task.text)}" ${task.done ? 'checked' : ''}><span class="${task.done ? 'task-done' : ''}">${highlight(task.text, term)}</span></label>`).join('') || `<p class="task-empty">${t('从“更多操作 → 编辑内容”添加待办项目')}</p>`}</div>` ) +
+      (item.images?.length ? `<div class="card-images">${item.images.map(id => `<div class="card-image-wrap" data-image-id="${esc(id)}" title="${t('点击预览；长按拖动可调整顺序')}"><img class="card-image" data-image-id="${esc(id)}" data-action="preview-image" alt="${t('素材图片')}"><button class="remove-card-image" type="button" data-action="remove-image" data-image-id="${esc(id)}" aria-label="${t('删除这张图片')}" title="${t('删除图片')}">×</button></div>`).join('')}</div>` : '') +
+      (item.tags?.length ? `<footer class="card-foot">${item.tags.map(tag => `<button class="tag" type="button" data-tag-filter="${esc(tag)}" aria-label="${t('筛选标签')} ${esc(tag)}">#${esc(tag)}</button>`).join('')}</footer>` : '') +
       `</article>`;
   }).join('');
 
@@ -402,13 +404,13 @@ export function renderCards(items, aiKeyConfigured = false) {
     } else {
       emptyEl.hidden = false;
       if (!categories.length) {
-        emptyEl.innerHTML = `<span>＋</span><h2>先创建一个分类</h2><p>分类由你自己创建，之后可在这里添加素材。</p><button class="button primary" id="empty-category">＋ 新建分类</button>`;
+        emptyEl.innerHTML = `<span>＋</span><h2>${t('先创建一个分类')}</h2><p>${t('分类由你自己创建，之后可在这里添加素材。')}</p><button class="button primary" id="empty-category">${t('＋ 新建分类')}</button>`;
       } else if (store.searchQuery.trim() || store.tagFilter || store.filter !== 'all' || store.view === 'favorites' || store.view === 'recent') {
-        emptyEl.innerHTML = `<span>⌕</span><h2>没有匹配的内容</h2><p>试试调整搜索词或筛选条件，也可以查看全部内容。</p><button class="button" id="empty-show-all">查看全部内容</button><button class="button primary" id="empty-new">＋ 新建内容</button>`;
+        emptyEl.innerHTML = `<span>⌕</span><h2>${t('没有匹配的内容')}</h2><p>${t('试试调整搜索词或筛选条件，也可以查看全部内容。')}</p><button class="button" id="empty-show-all">${t('查看全部内容')}</button><button class="button primary" id="empty-new">${t('＋ 新建内容')}</button>`;
       } else if (store.view === 'category') {
-        emptyEl.innerHTML = `<span>▤</span><h2>这个分类还没有内容</h2><p>添加话术、文档或待办清单，之后就能在这里快速查找。</p><button class="button primary" id="empty-new">＋ 新建内容</button>`;
+        emptyEl.innerHTML = `<span>▤</span><h2>${t('这个分类还没有内容')}</h2><p>${t('添加话术、文档或待办清单，之后就能在这里快速查找。')}</p><button class="button primary" id="empty-new">${t('＋ 新建内容')}</button>`;
       } else {
-        emptyEl.innerHTML = `<span>▤</span><h2>素材库还是空的</h2><p>创建话术、文档或待办清单，常用内容都可以放在这里。</p><button class="button primary" id="empty-new">＋ 新建内容</button>`;
+        emptyEl.innerHTML = `<span>▤</span><h2>${t('素材库还是空的')}</h2><p>${t('创建话术、文档或待办清单，常用内容都可以放在这里。')}</p><button class="button primary" id="empty-new">${t('＋ 新建内容')}</button>`;
       }
     }
   }
@@ -447,7 +449,7 @@ export async function handleCardAction(actionElement, callbacks) {
     const clone = {
       ...targetItem,
       id: crypto.randomUUID(),
-      title: `${targetItem.title || '未命名素材'}（副本）`,
+      title: `${targetItem.title || uiText('未命名素材')}${uiText('（副本）')}`,
       translations: [...targetItem.translations],
       tasks: (targetItem.tasks || []).map(task => ({ ...task })),
       tags: [...targetItem.tags],
@@ -461,8 +463,8 @@ export async function handleCardAction(actionElement, callbacks) {
     store.persist();
     callbacks.onRefresh();
   } else if (actionType === 'delete-item') {
-    const itemTitle = targetItem.title || '未命名素材';
-    const confirmed = await askConfirm(`确认删除“${itemTitle}”？此操作不可撤销。`, '删除素材', '确认删除', true);
+    const itemTitle = targetItem.title || uiText('未命名素材');
+    const confirmed = await askConfirm(uiText('确认删除“{title}”？此操作不可撤销。').replace('{title}', itemTitle), uiText('删除素材'), uiText('确认删除'), true);
     if (confirmed) {
       store.state.items = store.state.items.filter(entry => entry.id !== targetItem.id);
       store.persist();
