@@ -500,9 +500,10 @@ function setupCategoryReorderListeners() {
   });
 
   document.addEventListener('pointerdown', event => {
-    const label = event.target.closest('.category-name');
-    const row = label?.closest('[data-category-row]');
+    const button = event.target.closest('.category-button');
+    const row = button?.closest('[data-category-row]');
     if (!row || event.button !== 0) return;
+    button.setPointerCapture(event.pointerId);
     categoryReorder = { name: row.dataset.categoryRow, pointerId: event.pointerId, x: event.clientX, y: event.clientY, active: false };
   });
 
