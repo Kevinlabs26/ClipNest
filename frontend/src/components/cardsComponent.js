@@ -346,7 +346,9 @@ export function renderCards(items, aiKeyConfigured = false) {
 
     // Build 1-click dual language copy pills
     let copyButtonsHtml = '';
-    if (!isScript) {
+    if (isDocument) {
+      copyButtonsHtml = `<button class="card-copy-pill" data-action="copy-0" title="${t('复制内容')}">${t('复制内容')}</button>`;
+    } else if (!isScript) {
       copyButtonsHtml = '';
     } else if (language === '0') {
       copyButtonsHtml = `<button class="card-copy-pill" data-action="copy-0" title="${t('复制')} ${esc(languages[0])}">${t('复制')} ${esc(languages[0])}</button>`;
@@ -373,7 +375,7 @@ export function renderCards(items, aiKeyConfigured = false) {
       (selectionModeActive ? `<button class="select-item ${isSelected ? 'selected' : ''}" data-select-item="${esc(item.id)}" type="button" aria-label="${t(isSelected ? '取消选择' : '选择素材')}" aria-pressed="${isSelected}">${isSelected ? '✓' : ''}</button>` : '') +
       `<button class="card-icon" data-action="icon" title="${t('自定义图标')}" aria-label="${t('自定义素材图标')}">${esc(item.icon || '▤')}</button>` +
       `<div><h2 class="card-title" data-inline-title title="${t('双击直接编辑')}">${highlight(item.title, term)}</h2>` +
-      `<div class="card-meta">${item.category ? esc(fullCategoryPath) : t('未分类')} · ${isScript ? `${esc(languages[0])}${item.hasSecondLanguage ? ` / ${esc(languages[1])}` : ''}` : isDocument ? `${t('文档')} · ${t('字数')}: <span data-document-count>${countDocumentCharacters(item.translations[0])}</span>` : `${t('待办清单')} · ${(item.tasks || []).filter(task => task.done).length}/${(item.tasks || []).length} ${t('已完成')}`}<span data-copy-count>${isScript && item.copied ? ` · ${t('已复制')} ${item.copied} ${t('次')}` : ''}</span>${isScript && varNames.length ? `<span class="card-meta-var-badge" title="${t('包含')} ${varNames.length} ${t('个变量')}：${esc(varNames.join(', '))}">⚡ ${varNames.length} ${t('变量')}</span>` : ''}</div>` +
+      `<div class="card-meta">${item.category ? esc(fullCategoryPath) : t('未分类')} · ${isScript ? `${esc(languages[0])}${item.hasSecondLanguage ? ` / ${esc(languages[1])}` : ''}` : isDocument ? `${t('文档')} · ${t('字数')}: <span data-document-count>${countDocumentCharacters(item.translations[0])}</span>` : `${t('待办清单')} · ${(item.tasks || []).filter(task => task.done).length}/${(item.tasks || []).length} ${t('已完成')}`}<span data-copy-count>${(isScript || isDocument) && item.copied ? ` · ${t('已复制')} ${item.copied} ${t('次')}` : ''}</span>${isScript && varNames.length ? `<span class="card-meta-var-badge" title="${t('包含')} ${varNames.length} ${t('个变量')}：${esc(varNames.join(', '))}">⚡ ${varNames.length} ${t('变量')}</span>` : ''}</div>` +
       `</div>` +
       `<div class="card-actions">` +
       `<button class="icon-button ${item.favorite ? 'favorite' : ''}" data-action="favorite" title="${t('收藏')}" aria-label="${t('收藏')}">${item.favorite ? '★' : '☆'}</button>` +

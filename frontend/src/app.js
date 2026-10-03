@@ -96,9 +96,10 @@ export function renderAppView() {
 
 // Perform copy action on an item translation with variable templating
 async function handleCopyItemAction(item, translationIndex) {
-  if ((item.type || 'script') !== 'script') return;
+  const isDocument = item.type === 'document';
+  if (!isDocument && (item.type || 'script') !== 'script') return;
   let content = item.translations[translationIndex] || '';
-  const variables = extractVariables(content);
+  const variables = isDocument ? [] : extractVariables(content);
 
   if (variables.length > 0) {
     if (store.scenarioFlow) {
@@ -122,7 +123,7 @@ async function handleCopyItemAction(item, translationIndex) {
   item.copied = (item.copied || 0) + 1;
   item.recent = Date.now();
   persist();
-  toast(`${uiText('✓ 已复制')} ${displayLanguageName(state.languages[translationIndex])}`);
+  toast(`${uiText('✓ 已复制')} ${isDocument ? uiText('正文') : displayLanguageName(state.languages[translationIndex])}`);
   const currentCard = [...document.querySelectorAll('.content-card')].find(card => card.dataset.id === item.id);
   const copyCount = currentCard?.querySelector('[data-copy-count]');
   if (copyCount) copyCount.textContent = ` · ${uiText('已复制')} ${item.copied} ${uiText('次')}`;
